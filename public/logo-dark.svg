@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-labelledby="title description">
+  <title id="title">WickdAlgo continuous candlestick W in forest moss and iron on transparent</title>
+  <desc id="description">The validated seventeen-candle W geometry in forest moss and iron on a transparent canvas, reserved for dark contexts.</desc>
+  <rect class="canvas" fill="none" x="0" y="0" width="1024" height="1024"></rect>
+  <g id="candles" shape-rendering="crispEdges">
+    <g id="candle-01" class="down">
+      <rect class="wick" fill="#666666" x="124" y="232" width="8" height="180"></rect>
+      <rect class="body-border" fill="#666666" x="112" y="280" width="32" height="96"></rect>
+      <rect class="body-fill" fill="#666666" x="116" y="284" width="24" height="88"></rect>
+    </g>
+    <g id="candle-02" class="down">
+      <rect class="wick" fill="#666666" x="172" y="340" width="8" height="240"></rect>
+      <rect class="body-border" fill="#666666" x="160" y="376" width="32" height="132"></rect>
+      <rect class="body-fill" fill="#666666" x="164" y="380" width="24" height="124"></rect>
+    </g>
+    <g id="candle-03" class="up">
+      <rect class="wick" fill="#31805a" x="220" y="400" width="8" height="144"></rect>
+      <rect class="body-border" fill="#31805a" x="208" y="448" width="32" height="60"></rect>
+      <rect class="body-fill" fill="#31805a" x="212" y="452" width="24" height="52"></rect>
+    </g>
+    <g id="candle-04" class="down">
+      <rect class="wick" fill="#666666" x="268" y="424" width="8" height="288"></rect>
+      <rect class="body-border" fill="#666666" x="256" y="448" width="32" height="192"></rect>
+      <rect class="body-fill" fill="#666666" x="260" y="452" width="24" height="184"></rect>
+    </g>
+    <g id="candle-05" class="up">
+      <rect class="wick" fill="#31805a" x="316" y="484" width="8" height="192"></rect>
+      <rect class="body-border" fill="#31805a" x="304" y="532" width="32" height="108"></rect>
+      <rect class="body-fill" fill="#31805a" x="308" y="536" width="24" height="100"></rect>
+    </g>
+    <g id="candle-06" class="down">
+      <rect class="wick" fill="#666666" x="364" y="472" width="8" height="132"></rect>
+      <rect class="body-border" fill="#666666" x="352" y="532" width="32" height="36"></rect>
+      <rect class="body-fill" fill="#666666" x="356" y="536" width="24" height="28"></rect>
+    </g>
+    <g id="candle-07" class="up">
+      <rect class="wick" fill="#31805a" x="412" y="364" width="8" height="228"></rect>
+      <rect class="body-border" fill="#31805a" x="400" y="424" width="32" height="144"></rect>
+      <rect class="body-fill" fill="#31805a" x="404" y="428" width="24" height="136"></rect>
+    </g>
+    <g id="candle-08" class="up">
+      <rect class="wick" fill="#31805a" x="460" y="268" width="8" height="192"></rect>
+      <rect class="body-border" fill="#31805a" x="448" y="328" width="32" height="96"></rect>
+      <rect class="body-fill" fill="#31805a" x="452" y="332" width="24" height="88"></rect>
+    </g>
+    <g id="candle-09" class="down">
+      <rect class="wick" fill="#666666" x="508" y="280" width="8" height="180"></rect>
+      <rect class="body-border" fill="#666666" x="496" y="328" width="32" height="84"></rect>
+      <rect class="body-fill" fill="#666666" x="500" y="332" width="24" height="76"></rect>
+    </g>
+    <g id="candle-10" class="up">
+      <rect class="wick" fill="#31805a" x="556" y="316" width="8" height="120"></rect>
+      <rect class="body-border" fill="#31805a" x="544" y="364" width="32" height="48"></rect>
+      <rect class="body-fill" fill="#31805a" x="548" y="368" width="24" height="40"></rect>
+    </g>
+    <g id="candle-11" class="down">
+      <rect class="wick" fill="#666666" x="604" y="328" width="8" height="240"></rect>
+      <rect class="body-border" fill="#666666" x="592" y="364" width="32" height="156"></rect>
+      <rect class="body-fill" fill="#666666" x="596" y="368" width="24" height="148"></rect>
+    </g>
+    <g id="candle-12" class="down">
+      <rect class="wick" fill="#666666" x="652" y="484" width="8" height="276"></rect>
+      <rect class="body-border" fill="#666666" x="640" y="520" width="32" height="168"></rect>
+      <rect class="body-fill" fill="#666666" x="644" y="524" width="24" height="160"></rect>
+    </g>
+    <g id="candle-13" class="up">
+      <rect class="wick" fill="#31805a" x="700" y="544" width="8" height="180"></rect>
+      <rect class="body-border" fill="#31805a" x="688" y="592" width="32" height="96"></rect>
+      <rect class="body-fill" fill="#31805a" x="692" y="596" width="24" height="88"></rect>
+    </g>
+    <g id="candle-14" class="up">
+      <rect class="wick" fill="#31805a" x="748" y="400" width="8" height="228"></rect>
+      <rect class="body-border" fill="#31805a" x="736" y="460" width="32" height="132"></rect>
+      <rect class="body-fill" fill="#31805a" x="740" y="464" width="24" height="124"></rect>
+    </g>
+    <g id="candle-15" class="down">
+      <rect class="wick" fill="#666666" x="796" y="424" width="8" height="132"></rect>
+      <rect class="body-border" fill="#666666" x="784" y="460" width="32" height="48"></rect>
+      <rect class="body-fill" fill="#666666" x="788" y="464" width="24" height="40"></rect>
+    </g>
+    <g id="candle-16" class="up">
+      <rect class="wick" fill="#31805a" x="844" y="340" width="8" height="204"></rect>
+      <rect class="body-border" fill="#31805a" x="832" y="376" width="32" height="132"></rect>
+      <rect class="body-fill" fill="#31805a" x="836" y="380" width="24" height="124"></rect>
+    </g>
+    <g id="candle-17" class="up">
+      <rect class="wick" fill="#31805a" x="892" y="244" width="8" height="168"></rect>
+      <rect class="body-border" fill="#31805a" x="880" y="316" width="32" height="60"></rect>
+      <rect class="body-fill" fill="#31805a" x="884" y="320" width="24" height="52"></rect>
+    </g>
+  </g>
+</svg>
