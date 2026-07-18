@@ -4,11 +4,9 @@ import {
   Card,
   CandleChart,
   Checkbox,
-  Footer,
   GradientUnderline,
   Highlight,
   Input,
-  NavBar,
   SectionBand,
   Select,
   StatCard,
@@ -19,11 +17,9 @@ import {
   Tag,
 } from "@/components/ui";
 
-export default function Home() {
+export default function DesignPage() {
   return (
-    <div>
-      <NavBar active="Platform" />
-
+    <main>
       {/* Hero */}
       <section className="mx-auto max-w-(--page-max-width) px-6 py-20">
         <h1 className="font-display text-display font-semibold text-ink m-0">
@@ -32,9 +28,9 @@ export default function Home() {
           Strategies make decisions.
         </h1>
         <p className="text-body text-ink-secondary mt-6 max-w-2xl">
-          WickdAlgo transforms complex price action into{" "}
-          <Highlight>deterministic, measurable, and visually verifiable</Highlight> market
-          structures. It does not sell predictions — it makes market structure visible.
+          The WickdAlgo component library:{" "}
+          <Highlight>deterministic, measurable, and visually verifiable</Highlight> parts,
+          exercised on one page.
         </p>
         <div className="mt-8 flex items-center gap-3">
           <Button size="lg" arrow>
@@ -150,8 +146,6 @@ export default function Home() {
           </Card>
         </div>
       </section>
-
-      <Footer />
-    </div>
+    </main>
   );
 }

@@ -10,5 +10,9 @@
   `--font-inter`, consumed by `--font-display` / `--font-ui`).
 - Logos copied to `public/logo.svg` (light, primary) and `public/logo-dark.svg`
   (reserved for dark contexts).
-- Not imported: `guidelines/` specimen cards, `ui_kits/` pages, `_ds_bundle.js`
-  (design-tool runtime artifacts, not app code).
+- Not imported: `guidelines/` specimen cards, `_ds_bundle.js` (design-tool
+  runtime artifacts, not app code).
+- 2026-07-18 (2nd pass): `ui_kits/` ported as real routes — website kit →
+  `/` (home), `/engine`, `/pricing` under `src/app/(site)/` (shared NavBar +
+  Footer layout); platform kit → `/platform` (left-rail dashboard, views in
+  `src/components/platform/`). Component showcase moved to `/design`.
