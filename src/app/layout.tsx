@@ -13,8 +13,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "WickdAlgo — High-Confidence Intelligence",
-  description: "Core emits structures. Strategies make decisions.",
+  title: "WickdAlgo — Market Structure, Made Visible",
+  description:
+    "WickdAlgo turns complex price action into deterministic, measurable market structures — swings, order blocks, FVGs, liquidity — that traders and strategy agents can build on.",
 };
 
 export default function RootLayout({

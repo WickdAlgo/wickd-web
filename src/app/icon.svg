@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img" aria-label="WickdAlgo">
+  <!-- WickdAlgo candlestick W favicon.
+       Source: .github/profile/assets/brand/concepts/wickdalgo-mark-candlestick-w-grid-ivory-salmon.svg
+       Palette: canvas #FFFEEE; up body #FFFFFF; down body #F77C80; border and wick #000000. -->
+  <style>
+    .canvas { fill: #FFFEEE; }
+    .wick, .body-border { fill: #000000; }
+    .up .body-fill { fill: #FFFFFF; }
+    .down .body-fill { fill: #F77C80; }
+  </style>
+  <rect class="canvas" x="0" y="0" width="1024" height="1024" rx="128"/>
+  <g id="candles">
+    <g class="down">
+      <rect class="wick" x="124" y="232" width="8" height="180"/>
+      <rect class="body-border" x="112" y="280" width="32" height="96"/>
+      <rect class="body-fill" x="116" y="284" width="24" height="88"/>
+    </g>
+    <g class="down">
+      <rect class="wick" x="172" y="340" width="8" height="240"/>
+      <rect class="body-border" x="160" y="376" width="32" height="132"/>
+      <rect class="body-fill" x="164" y="380" width="24" height="124"/>
+    </g>
+    <g class="up">
+      <rect class="wick" x="220" y="400" width="8" height="144"/>
+      <rect class="body-border" x="208" y="448" width="32" height="60"/>
+      <rect class="body-fill" x="212" y="452" width="24" height="52"/>
+    </g>
+    <g class="down">
+      <rect class="wick" x="268" y="424" width="8" height="288"/>
+      <rect class="body-border" x="256" y="448" width="32" height="192"/>
+      <rect class="body-fill" x="260" y="452" width="24" height="184"/>
+    </g>
+    <g class="up">
+      <rect class="wick" x="316" y="484" width="8" height="192"/>
+      <rect class="body-border" x="304" y="532" width="32" height="108"/>
+      <rect class="body-fill" x="308" y="536" width="24" height="100"/>
+    </g>
+    <g class="down">
+      <rect class="wick" x="364" y="472" width="8" height="132"/>
+      <rect class="body-border" x="352" y="532" width="32" height="36"/>
+      <rect class="body-fill" x="356" y="536" width="24" height="28"/>
+    </g>
+    <g class="up">
+      <rect class="wick" x="412" y="364" width="8" height="228"/>
+      <rect class="body-border" x="400" y="424" width="32" height="144"/>
+      <rect class="body-fill" x="404" y="428" width="24" height="136"/>
+    </g>
+    <g class="up">
+      <rect class="wick" x="460" y="268" width="8" height="192"/>
+      <rect class="body-border" x="448" y="328" width="32" height="96"/>
+      <rect class="body-fill" x="452" y="332" width="24" height="88"/>
+    </g>
+    <g class="down">
+      <rect class="wick" x="508" y="280" width="8" height="180"/>
+      <rect class="body-border" x="496" y="328" width="32" height="84"/>
+      <rect class="body-fill" x="500" y="332" width="24" height="76"/>
+    </g>
+    <g class="up">
+      <rect class="wick" x="556" y="316" width="8" height="120"/>
+      <rect class="body-border" x="544" y="364" width="32" height="48"/>
+      <rect class="body-fill" x="548" y="368" width="24" height="40"/>
+    </g>
+    <g class="down">
+      <rect class="wick" x="604" y="328" width="8" height="240"/>
+      <rect class="body-border" x="592" y="364" width="32" height="156"/>
+      <rect class="body-fill" x="596" y="368" width="24" height="148"/>
+    </g>
+    <g class="down">
+      <rect class="wick" x="652" y="484" width="8" height="276"/>
+      <rect class="body-border" x="640" y="520" width="32" height="168"/>
+      <rect class="body-fill" x="644" y="524" width="24" height="160"/>
+    </g>
+    <g class="up">
+      <rect class="wick" x="700" y="544" width="8" height="180"/>
+      <rect class="body-border" x="688" y="592" width="32" height="96"/>
+      <rect class="body-fill" x="692" y="596" width="24" height="88"/>
+    </g>
+    <g class="up">
+      <rect class="wick" x="748" y="400" width="8" height="228"/>
+      <rect class="body-border" x="736" y="460" width="32" height="132"/>
+      <rect class="body-fill" x="740" y="464" width="24" height="124"/>
+    </g>
+    <g class="down">
+      <rect class="wick" x="796" y="424" width="8" height="132"/>
+      <rect class="body-border" x="784" y="460" width="32" height="48"/>
+      <rect class="body-fill" x="788" y="464" width="24" height="40"/>
+    </g>
+    <g class="up">
+      <rect class="wick" x="844" y="340" width="8" height="204"/>
+      <rect class="body-border" x="832" y="376" width="32" height="132"/>
+      <rect class="body-fill" x="836" y="380" width="24" height="124"/>
+    </g>
+    <g class="up">
+      <rect class="wick" x="892" y="244" width="8" height="168"/>
+      <rect class="body-border" x="880" y="316" width="32" height="60"/>
+      <rect class="body-fill" x="884" y="320" width="24" height="52"/>
+    </g>
+  </g>
+</svg>
