@@ -30,7 +30,7 @@ const tagColors: Record<TagTone, { bg: string; fg: string; bd?: string }> = {
   },
   bullish: { bg: "var(--structure-bullish)", fg: "var(--text-primary)" },
   bearish: { bg: "var(--structure-bearish)", fg: "var(--text-primary)" },
-  ic: { bg: "var(--structure-ic)", fg: "#fff" },
+  ic: { bg: "var(--structure-ic)", fg: "var(--text-inverse)" },
   fvg: {
     bg: "transparent",
     fg: "var(--structure-fvg)",
@@ -48,9 +48,9 @@ const tagColors: Record<TagTone, { bg: string; fg: string; bd?: string }> = {
     fg: "var(--text-secondary)",
     bd: "var(--border-strong)",
   },
-  long: { bg: "var(--signal-long)", fg: "#fff" },
-  short: { bg: "var(--signal-short)", fg: "#fff" },
-  dark: { bg: "var(--surface-inverse)", fg: "#fff" },
+  long: { bg: "var(--signal-long)", fg: "var(--text-inverse)" },
+  short: { bg: "var(--signal-short)", fg: "var(--text-inverse)" },
+  dark: { bg: "var(--surface-inverse)", fg: "var(--text-inverse)" },
 };
 
 export function Tag({ tone = "neutral", mono = false, children, style }: TagProps) {

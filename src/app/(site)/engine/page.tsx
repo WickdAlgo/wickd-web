@@ -9,7 +9,7 @@ function Terminal({ lines }: { lines: string[] }) {
         <div
           key={i}
           className="whitespace-pre"
-          style={{ color: l.startsWith("$") ? "#ffffff" : "var(--text-inverse-muted)" }}
+          style={{ color: l.startsWith("$") ? "var(--text-inverse)" : "var(--text-inverse-muted)" }}
         >
           {l}
         </div>

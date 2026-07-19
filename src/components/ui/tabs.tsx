@@ -37,12 +37,12 @@ export function Tabs({ items = [], active, onChange, dark = false }: TabsProps) 
             background: "transparent",
             border: "none",
             borderBottom: `2px solid ${
-              cur === t ? (dark ? "#fff" : "var(--color-obsidian)") : "transparent"
+              cur === t ? (dark ? "var(--text-inverse)" : "var(--color-obsidian)") : "transparent"
             }`,
             color:
               cur === t
                 ? dark
-                  ? "#fff"
+                  ? "var(--text-inverse)"
                   : "var(--text-primary)"
                 : dark
                   ? "var(--text-inverse-muted)"

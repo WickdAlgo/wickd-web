@@ -35,7 +35,7 @@ export default function PlatformPage() {
             className="font-display cursor-pointer rounded-buttons border-none px-3 py-[9px] text-left text-[14px] font-medium tracking-[0.35px]"
             style={{
               background: view === n.id ? "var(--color-obsidian)" : "transparent",
-              color: view === n.id ? "#fff" : "var(--text-primary)",
+              color: view === n.id ? "var(--text-inverse)" : "var(--text-primary)",
               transition: "var(--transition-fast)",
             }}
           >
