@@ -55,7 +55,7 @@ export default function DesignPage() {
           </div>
           <Card padding={0}>
             <div className="border-b border-hairline px-4 pt-3">
-              <Tabs items={["Events", "Settings"]} active="Events" onChange={() => {}} />
+              <Tabs items={["Events", "Settings"]} />
             </div>
             <StructureEventRow
               time="09:15:00Z"
@@ -136,8 +136,8 @@ export default function DesignPage() {
               <Input label="Market" mono defaultValue="BTC_USDT_PERP" hint="CCXT Binance symbol" />
               <Select label="Timeframe" mono options={["1m", "5m", "15m", "1h", "4h"]} defaultValue="5m" />
               <div className="flex flex-wrap items-center gap-6">
-                <Checkbox label="Journal structures" checked onChange={() => {}} />
-                <Switch label="Deterministic replay" checked onChange={() => {}} />
+                <Checkbox label="Journal structures" defaultChecked />
+                <Switch label="Deterministic replay" defaultChecked />
               </div>
               <div>
                 <Button arrow>Run backtest</Button>

@@ -1,19 +1,6 @@
 "use client";
 import React from "react";
-
-const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
-
-export function useReducedMotion() {
-  return React.useSyncExternalStore(
-    (onChange) => {
-      const mq = window.matchMedia(REDUCED_MOTION_QUERY);
-      mq.addEventListener("change", onChange);
-      return () => mq.removeEventListener("change", onChange);
-    },
-    () => window.matchMedia(REDUCED_MOTION_QUERY).matches,
-    () => false,
-  );
-}
+import { useReducedMotion } from "@/lib/use-reduced-motion";
 
 /* ---------------------------------------------------------------- geometry
  *
@@ -111,13 +98,15 @@ const OUT_X = 982; // output pills' left edge (inside the layer)
 
 /* connector paths ---------------------------------------------------------- */
 
+/** Rows squeezed toward the centre line where wires meet the engine band. */
+const NEAR_Y = [0, 1, 2, 3].map((i) => MID_Y + (i - 1.5) * 7);
+
 /** Fan-in: horizontal out of each pill, one smooth bend, horizontal into Adapters. */
 const IN_BEND = 220;
 const IN_MERGE = 280;
-const enterY = [0, 1, 2, 3].map((i) => MID_Y + (i - 1.5) * 7);
 const fanInD = ROW_Y.map((y, i) => {
   const k = 0.5 * (IN_MERGE - IN_BEND);
-  return `M ${inRailStart[i]} ${y} L ${IN_BEND} ${y} C ${IN_BEND + k} ${y}, ${IN_MERGE - k} ${enterY[i]}, ${IN_MERGE} ${enterY[i]} L ${NODE_X[0]} ${enterY[i]}`;
+  return `M ${inRailStart[i]} ${y} L ${IN_BEND} ${y} C ${IN_BEND + k} ${y}, ${IN_MERGE - k} ${NEAR_Y[i]}, ${IN_MERGE} ${NEAR_Y[i]} L ${NODE_X[0]} ${NEAR_Y[i]}`;
 });
 
 /** Straight wires between adjacent engine nodes. */
@@ -127,10 +116,9 @@ const midD = [0, 1].map((i) => `M ${nodeR[i]} ${MID_Y} L ${NODE_X[i + 1]} ${MID_
  *  the Management layer, so they cross its border horizontally and aligned. */
 const OUT_SPLIT = 880;
 const OUT_MERGE = 940; // curve completes ahead of the layer (MGMT_X = 952)
-const leaveY = [0, 1, 2, 3].map((i) => MID_Y + (i - 1.5) * 7);
 const fanOutD = ROW_Y.map((y, i) => {
   const k = 0.5 * (OUT_MERGE - OUT_SPLIT);
-  return `M ${STRAT_R} ${leaveY[i]} L ${OUT_SPLIT} ${leaveY[i]} C ${OUT_SPLIT + k} ${leaveY[i]}, ${OUT_MERGE - k} ${y}, ${OUT_MERGE} ${y} L ${OUT_X} ${y}`;
+  return `M ${STRAT_R} ${NEAR_Y[i]} L ${OUT_SPLIT} ${NEAR_Y[i]} C ${OUT_SPLIT + k} ${NEAR_Y[i]}, ${OUT_MERGE - k} ${y}, ${OUT_MERGE} ${y} L ${OUT_X} ${y}`;
 });
 
 const CHIP_POS = [
@@ -146,21 +134,15 @@ type NodeId =
   | "out-0" | "out-1" | "out-2" | "out-3";
 
 type Place = "above" | "right" | "left";
+type NodeInfo = { title: string; blurb: string; anchor: { x: number; y: number }; place: Place };
 
-const NODE_INFO: Record<NodeId, { title: string; blurb: string; anchor: { x: number; y: number }; place: Place }> = {
-  "in-0": { title: INPUTS[0].title, blurb: INPUTS[0].blurb, anchor: { x: inRailStart[0] + 14, y: ROW_Y[0] }, place: "right" },
-  "in-1": { title: INPUTS[1].title, blurb: INPUTS[1].blurb, anchor: { x: inRailStart[1] + 14, y: ROW_Y[1] }, place: "right" },
-  "in-2": { title: INPUTS[2].title, blurb: INPUTS[2].blurb, anchor: { x: inRailStart[2] + 14, y: ROW_Y[2] }, place: "right" },
-  "in-3": { title: INPUTS[3].title, blurb: INPUTS[3].blurb, anchor: { x: inRailStart[3] + 14, y: ROW_Y[3] }, place: "right" },
-  adapters: { title: MODULES[0].title, blurb: MODULES[0].blurb, anchor: { x: nodeCX[0], y: NODE_TOP - 6 }, place: "above" },
-  core: { title: MODULES[1].title, blurb: MODULES[1].blurb, anchor: { x: nodeCX[1], y: NODE_TOP - 6 }, place: "above" },
-  strategies: { title: MODULES[2].title, blurb: MODULES[2].blurb, anchor: { x: nodeCX[2], y: NODE_TOP - 6 }, place: "above" },
-  management: { title: MANAGEMENT.title, blurb: MANAGEMENT.blurb, anchor: { x: MGMT_CX, y: MGMT_Y - 6 }, place: "above" },
-  "out-0": { title: OUTPUTS[0].title, blurb: OUTPUTS[0].blurb, anchor: { x: OUT_X - 4, y: ROW_Y[0] }, place: "left" },
-  "out-1": { title: OUTPUTS[1].title, blurb: OUTPUTS[1].blurb, anchor: { x: OUT_X - 4, y: ROW_Y[1] }, place: "left" },
-  "out-2": { title: OUTPUTS[2].title, blurb: OUTPUTS[2].blurb, anchor: { x: OUT_X - 4, y: ROW_Y[2] }, place: "left" },
-  "out-3": { title: OUTPUTS[3].title, blurb: OUTPUTS[3].blurb, anchor: { x: OUT_X - 4, y: ROW_Y[3] }, place: "left" },
-};
+/** Tooltip copy + anchor per node, derived from the data tables above. */
+const NODE_INFO = Object.fromEntries([
+  ...INPUTS.map((n, i) => [n.id, { title: n.title, blurb: n.blurb, anchor: { x: inRailStart[i] + 14, y: ROW_Y[i] }, place: "right" }]),
+  ...MODULES.map((m, i) => [m.id, { title: m.title, blurb: m.blurb, anchor: { x: nodeCX[i], y: NODE_TOP - 6 }, place: "above" }]),
+  [MANAGEMENT.id, { title: MANAGEMENT.title, blurb: MANAGEMENT.blurb, anchor: { x: MGMT_CX, y: MGMT_Y - 6 }, place: "above" }],
+  ...OUTPUTS.map((n, i) => [n.id, { title: n.title, blurb: n.blurb, anchor: { x: OUT_X - 4, y: ROW_Y[i] }, place: "left" }]),
+]) as Record<NodeId, NodeInfo>;
 
 const PLACE_TRANSFORM: Record<Place, string> = {
   above: "translate(-50%, calc(-100% - 12px))",
@@ -169,20 +151,19 @@ const PLACE_TRANSFORM: Record<Place, string> = {
 };
 
 /** Which diagram elements stay lit when a node is hovered — traces the flow. */
-const ALL_OUT = ["p-out-0", "p-out-1", "p-out-2", "p-out-3", "out-0", "out-1", "out-2", "out-3"];
+const ALL_IN = INPUTS.flatMap((n, i) => [n.id, `p-in-${i}`]);
+const ALL_OUT = OUTPUTS.flatMap((n, i) => [`p-out-${i}`, n.id]);
 const ROUTES: Record<NodeId, string[]> = {
-  "in-0": ["in-0", "p-in-0", "adapters"],
-  "in-1": ["in-1", "p-in-1", "adapters"],
-  "in-2": ["in-2", "p-in-2", "adapters"],
-  "in-3": ["in-3", "p-in-3", "adapters"],
-  adapters: ["in-0", "in-1", "in-2", "in-3", "p-in-0", "p-in-1", "p-in-2", "p-in-3", "adapters", "p-mid-0", "chip-0", "core"],
+  ...(Object.fromEntries(
+    INPUTS.map((n, i) => [n.id, [n.id, `p-in-${i}`, "adapters"]]),
+  ) as Record<(typeof INPUTS)[number]["id"], string[]>),
+  adapters: [...ALL_IN, "adapters", "p-mid-0", "chip-0", "core"],
   core: ["adapters", "p-mid-0", "chip-0", "core", "p-mid-1", "chip-1", "strategies"],
   strategies: ["core", "p-mid-1", "chip-1", "strategies", "management", ...ALL_OUT],
   management: ["strategies", "management", ...ALL_OUT],
-  "out-0": ["strategies", "management", "p-out-0", "out-0"],
-  "out-1": ["strategies", "management", "p-out-1", "out-1"],
-  "out-2": ["strategies", "management", "p-out-2", "out-2"],
-  "out-3": ["strategies", "management", "p-out-3", "out-3"],
+  ...(Object.fromEntries(
+    OUTPUTS.map((n, i) => [n.id, ["strategies", "management", `p-out-${i}`, n.id]]),
+  ) as Record<(typeof OUTPUTS)[number]["id"], string[]>),
 };
 const ROUTE_SETS = Object.fromEntries(
   (Object.keys(ROUTES) as NodeId[]).map((k) => [k, new Set(ROUTES[k])]),

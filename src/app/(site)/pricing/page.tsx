@@ -1,6 +1,6 @@
 import { Button, Card, SectionBand, Tag, type TagTone } from "@/components/ui";
-
-const wrap = "mx-auto max-w-(--page-max-width) px-6";
+import { container } from "@/lib/styles";
+import { cx } from "@/lib/cx";
 
 interface Plan {
   tone: TagTone;
@@ -63,19 +63,13 @@ export default function PricingPage() {
   return (
     <main>
       <section className="pt-16 pb-12">
-        <div className={`${wrap} text-center`}>
-          <h1
-            className="font-display m-0 font-semibold"
-            style={{ fontSize: "clamp(56px,7vw,96px)", lineHeight: 1.05, letterSpacing: "1.4px" }}
-          >
+        <div className={cx(container, "text-center")}>
+          <h1 className="font-display m-0 text-display-page font-semibold">
             Open core.
             <br />
             Paid research loop.
           </h1>
-          <p
-            className="font-display mx-auto mt-5 max-w-[560px]"
-            style={{ fontSize: 20, letterSpacing: "0.5px" }}
-          >
+          <p className="font-display mx-auto mt-5 max-w-[560px] text-subheading">
             The engine is source-available today. Platform subscriptions arrive with the web
             research loop.
           </p>
@@ -83,21 +77,19 @@ export default function PricingPage() {
       </section>
       <SectionBand color="var(--structure-breaker)" />
       <section className="bg-card py-16">
-        <div className={`${wrap} grid grid-cols-1 items-stretch gap-6 md:grid-cols-3`}>
+        <div className={cx(container, "grid grid-cols-1 items-stretch gap-6 md:grid-cols-3")}>
           {plans.map((p) => (
             <Card
               key={p.name}
               elevation={p.float ? "float" : "flat"}
-              style={{ display: "flex", flexDirection: "column" }}
+              className="flex flex-col"
             >
               <div>
                 <Tag tone={p.tone}>{p.badge}</Tag>
               </div>
-              <h3 className="font-display mt-4 mb-1 text-[24px] font-semibold tracking-[0.6px]">
-                {p.name}
-              </h3>
+              <h3 className="font-display mt-4 mb-1 text-heading-sm font-semibold">{p.name}</h3>
               <div className="font-mono mt-1 mb-4 text-[28px] font-semibold">{p.price}</div>
-              <ul className="font-ui m-0 flex-1 pl-4.5 text-[14px] leading-[1.8] tracking-[0.35px] text-ink-secondary">
+              <ul className="font-ui m-0 flex-1 pl-4.5 text-body-sm leading-[1.8] text-ink-secondary">
                 {p.items.map((i) => (
                   <li key={i}>{i}</li>
                 ))}
@@ -106,7 +98,7 @@ export default function PricingPage() {
                 <Button
                   variant={p.ctaVariant}
                   arrow={p.ctaVariant !== "ghost"}
-                  style={{ width: "100%", justifyContent: "center" }}
+                  className="w-full justify-center"
                 >
                   {p.cta}
                 </Button>
@@ -114,7 +106,7 @@ export default function PricingPage() {
             </Card>
           ))}
         </div>
-        <div className={`${wrap} font-ui mt-8 text-center text-[12px] tracking-[0.3px] text-ink-secondary`}>
+        <div className={cx(container, "font-ui mt-8 text-center text-caption text-ink-secondary")}>
           Roadmap items are not production claims. Nothing here is financial advice.
         </div>
       </section>

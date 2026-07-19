@@ -1,8 +1,7 @@
 "use client";
 import React from "react";
 import { Button, Tag } from "@/components/ui";
-
-const panel = "bg-card border border-hairline rounded-cards";
+import { panel } from "@/lib/styles";
 const th =
   "font-ui border-b border-hairline px-4 py-2.5 text-left text-[10px] font-medium uppercase tracking-[1px] text-ink-secondary";
 const td = "font-mono border-b border-hairline px-4 py-[11px] text-[12.5px] tracking-[0.3px]";
