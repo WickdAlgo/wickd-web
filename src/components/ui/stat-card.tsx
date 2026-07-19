@@ -1,6 +1,7 @@
 import React from "react";
+import { cx } from "@/lib/cx";
 
-export interface StatCardProps {
+export interface StatCardProps extends React.HTMLAttributes<HTMLDivElement> {
   label: React.ReactNode;
   value: React.ReactNode;
   delta?: React.ReactNode;
@@ -8,57 +9,33 @@ export interface StatCardProps {
   tone?: "long" | "short";
   /** Value in the mono face (default — stats are data). */
   mono?: boolean;
-  style?: React.CSSProperties;
 }
 
-export function StatCard({ label, value, delta, tone, mono = true, style }: StatCardProps) {
-  const deltaColor =
-    tone === "long"
-      ? "var(--signal-long-deep)"
-      : tone === "short"
-        ? "var(--signal-short)"
-        : "var(--text-secondary)";
+export function StatCard({ label, value, delta, tone, mono = true, className, ...rest }: StatCardProps) {
   return (
     <div
-      style={{
-        background: "var(--surface-card)",
-        border: "1px solid var(--border-hairline)",
-        borderRadius: "var(--radius-cards)",
-        padding: "16px 20px",
-        ...style,
-      }}
+      className={cx("rounded-cards border border-hairline bg-card px-5 py-4", className)}
+      {...rest}
     >
+      <div className="font-ui text-caption text-ink-secondary">{label}</div>
       <div
-        style={{
-          fontFamily: "var(--font-ui)",
-          fontSize: "12px",
-          letterSpacing: "0.3px",
-          color: "var(--text-secondary)",
-        }}
-      >
-        {label}
-      </div>
-      <div
-        style={{
-          fontFamily: mono ? "var(--font-mono)" : "var(--font-display)",
-          fontSize: "28px",
-          fontWeight: 600,
-          letterSpacing: "0.5px",
-          marginTop: 4,
-          lineHeight: 1.1,
-        }}
+        className={cx(
+          "mt-1 text-[28px] font-semibold leading-[1.1] tracking-[0.5px]",
+          mono ? "font-mono" : "font-display",
+        )}
       >
         {value}
       </div>
       {delta && (
         <div
-          style={{
-            fontFamily: "var(--font-ui)",
-            fontSize: "12px",
-            letterSpacing: "0.3px",
-            color: deltaColor,
-            marginTop: 4,
-          }}
+          className={cx(
+            "font-ui mt-1 text-caption",
+            tone === "long"
+              ? "text-long-deep"
+              : tone === "short"
+                ? "text-short"
+                : "text-ink-secondary",
+          )}
         >
           {delta}
         </div>

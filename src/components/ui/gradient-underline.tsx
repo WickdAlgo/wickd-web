@@ -1,34 +1,29 @@
 import React from "react";
+import { cx } from "@/lib/cx";
 
-export interface GradientUnderlineProps {
+export interface GradientUnderlineProps
+  extends React.HTMLAttributes<HTMLSpanElement> {
   /** Solid start color of the underline gradient. */
   color?: string;
   height?: number;
-  children?: React.ReactNode;
-  style?: React.CSSProperties;
 }
 
 /** The single sanctioned gradient: solid chromatic → transparent underline. */
 export function GradientUnderline({
   color = "var(--structure-breaker)",
   height = 16,
+  className,
   children,
-  style,
+  ...rest
 }: GradientUnderlineProps) {
   return (
-    <span style={{ position: "relative", display: "inline-block", ...style }}>
-      <span style={{ position: "relative", zIndex: 1 }}>{children}</span>
+    <span className={cx("relative inline-block", className)} {...rest}>
+      <span className="relative z-[1]">{children}</span>
       <span
         aria-hidden="true"
-        style={{
-          position: "absolute",
-          left: 0,
-          right: 0,
-          bottom: -4,
-          height,
-          background: `linear-gradient(90deg, ${color}, transparent)`,
-        }}
-      ></span>
+        className="absolute inset-x-0 -bottom-1"
+        style={{ height, background: `linear-gradient(90deg, ${color}, transparent)` }}
+      />
     </span>
   );
 }

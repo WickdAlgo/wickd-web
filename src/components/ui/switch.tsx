@@ -1,57 +1,45 @@
 "use client";
 import React from "react";
+import { cx } from "@/lib/cx";
+import { useControllable } from "@/lib/use-controllable";
+import { toggleClass } from "./field";
 
 export interface SwitchProps {
   label?: React.ReactNode;
   checked?: boolean;
+  defaultChecked?: boolean;
   onChange?: (checked: boolean) => void;
   disabled?: boolean;
 }
 
-export function Switch({ label, checked, onChange, disabled }: SwitchProps) {
-  const [c, setC] = React.useState(!!checked);
-  const isC = onChange ? checked : c;
+export function Switch({ label, checked, defaultChecked, onChange, disabled }: SwitchProps) {
+  const [on, setOn] = useControllable(checked, defaultChecked ?? false);
   return (
-    <label
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 10,
-        cursor: disabled ? "default" : "pointer",
-        opacity: disabled ? 0.4 : 1,
-        fontFamily: "var(--font-ui)",
-        fontSize: "14px",
-        letterSpacing: "0.35px",
-      }}
-    >
+    <label className={toggleClass}>
+      <input
+        type="checkbox"
+        role="switch"
+        className="peer sr-only"
+        checked={on}
+        disabled={disabled}
+        onChange={(e) => {
+          setOn(e.target.checked);
+          onChange?.(e.target.checked);
+        }}
+      />
       <span
-        onClick={() => {
-          if (disabled) return;
-          if (onChange) onChange(!checked);
-          else setC(!c);
-        }}
-        style={{
-          width: 36,
-          height: 20,
-          borderRadius: "var(--radius-buttons)",
-          background: isC ? "var(--color-obsidian)" : "var(--color-pebble)",
-          position: "relative",
-          transition: "var(--transition-base)",
-          flex: "none",
-        }}
+        aria-hidden="true"
+        className={cx(
+          "relative inline-block h-5 w-9 flex-none rounded-buttons [transition:all_var(--transition-base)] peer-focus-visible:[box-shadow:var(--focus-ring)]",
+          on ? "bg-ink" : "bg-pebble",
+        )}
       >
         <span
-          style={{
-            position: "absolute",
-            top: 2,
-            left: isC ? 18 : 2,
-            width: 16,
-            height: 16,
-            borderRadius: "50%",
-            background: "var(--surface-card)",
-            transition: "var(--transition-base)",
-          }}
-        ></span>
+          className={cx(
+            "absolute top-0.5 size-4 rounded-full bg-card [transition:all_var(--transition-base)]",
+            on ? "left-[18px]" : "left-0.5",
+          )}
+        />
       </span>
       {label}
     </label>

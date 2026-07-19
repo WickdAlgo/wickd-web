@@ -1,4 +1,5 @@
 import React from "react";
+import { cx } from "@/lib/cx";
 
 export type CardElevation = "flat" | "float" | "strong";
 
@@ -14,33 +15,22 @@ export function Card({
   elevation = "flat",
   dark = false,
   padding = "var(--card-padding)",
-  children,
+  className,
   style,
   ...rest
 }: CardProps) {
-  const shadow =
-    elevation === "float"
-      ? "var(--shadow-xl)"
-      : elevation === "strong"
-        ? "var(--shadow-xl-2)"
-        : "none";
   return (
     <div
-      style={{
-        background: dark ? "var(--surface-panel)" : "var(--surface-card)",
-        color: dark ? "var(--text-inverse)" : "var(--text-primary)",
-        border:
-          elevation === "flat"
-            ? "1px solid var(--border-hairline)"
-            : "1px solid transparent",
-        borderRadius: "var(--radius-cards)",
-        padding,
-        boxShadow: shadow,
-        ...style,
-      }}
+      className={cx(
+        "rounded-cards border",
+        dark ? "bg-panel text-ink-inverse" : "bg-card text-ink",
+        elevation === "flat" ? "border-hairline" : "border-transparent",
+        elevation === "float" && "shadow-xl",
+        elevation === "strong" && "shadow-xl-2",
+        className,
+      )}
+      style={{ padding, ...style }}
       {...rest}
-    >
-      {children}
-    </div>
+    />
   );
 }
