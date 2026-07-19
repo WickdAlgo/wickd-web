@@ -202,3 +202,56 @@
     background: var(--highlight-marker);
   }
 }
+
+/* Motion — ambient hero drift + pipeline diagram */
+@keyframes wa-drift {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-12px);
+    opacity: 0.8;
+  }
+}
+.wa-drift {
+  animation: wa-drift 10s ease-in-out infinite alternate;
+}
+
+@keyframes wa-glow {
+  from {
+    opacity: 0.5;
+  }
+  to {
+    opacity: 0.95;
+  }
+}
+.wa-glow {
+  animation: wa-glow 4s ease-in-out infinite alternate;
+}
+
+@keyframes wa-pop {
+  0%,
+  68% {
+    transform: scale(1);
+  }
+  80% {
+    transform: scale(1.22);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.wa-pop {
+  animation: wa-pop 3s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wa-drift,
+  .wa-glow,
+  .wa-pop {
+    animation: none;
+  }
+}

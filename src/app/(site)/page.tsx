@@ -9,17 +9,37 @@ import {
   Tag,
   type TagTone,
 } from "@/components/ui";
+import { PipelineSection } from "@/components/home/pipeline-section";
 
 const wrap = "mx-auto max-w-(--page-max-width) px-6";
+
+const heroBlocks = [
+  { kind: "bullish", width: 170, height: 54, right: "16%", top: 64, dur: "9s", delay: "-2s" },
+  { kind: "fvg", width: 220, height: 30, right: "6%", top: 170, dur: "12s", delay: "-5s" },
+  { kind: "bearish", width: 140, height: 10, right: "24%", top: 250, dur: "8s", delay: "-1s" },
+  { kind: "ic", width: 56, height: 120, right: "11%", top: 290, dur: "13s", delay: "-7s" },
+  { kind: "breaker", width: 100, height: 36, right: "30%", top: 120, dur: "10s", delay: "-4s" },
+] as const;
 
 function Hero() {
   return (
     <section className="relative overflow-hidden pt-18 pb-22">
-      <StructureBlock kind="bullish" width={170} height={54} style={{ position: "absolute", right: "16%", top: 64, zIndex: 0 }} />
-      <StructureBlock kind="fvg" width={220} height={30} style={{ position: "absolute", right: "6%", top: 170, zIndex: 0 }} />
-      <StructureBlock kind="bearish" width={140} height={10} style={{ position: "absolute", right: "24%", top: 250, zIndex: 0 }} />
-      <StructureBlock kind="ic" width={56} height={120} style={{ position: "absolute", right: "11%", top: 290, zIndex: 0 }} />
-      <StructureBlock kind="breaker" width={100} height={36} style={{ position: "absolute", right: "30%", top: 120, zIndex: 0 }} />
+      {heroBlocks.map((b) => (
+        <div
+          key={b.kind}
+          className="wa-drift"
+          style={{
+            position: "absolute",
+            right: b.right,
+            top: b.top,
+            zIndex: 0,
+            animationDuration: b.dur,
+            animationDelay: b.delay,
+          }}
+        >
+          <StructureBlock kind={b.kind} width={b.width} height={b.height} />
+        </div>
+      ))}
       <div className={`${wrap} relative z-1`}>
         <h1
           className="font-display font-semibold m-0"
@@ -203,11 +223,12 @@ export default function HomePage() {
   return (
     <main>
       <Hero />
-      <SectionBand color="var(--structure-bullish)" />
-      <Features />
-      <SectionBand color="var(--structure-bearish)" />
-      <ChartSection />
+      <PipelineSection />
       <SectionBand color="var(--structure-breaker)" />
+      <Features />
+      <SectionBand color="var(--structure-bullish)" />
+      <ChartSection />
+      <SectionBand color="var(--structure-fvg)" />
       <Layers />
       <CtaBand />
     </main>
