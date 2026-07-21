@@ -11,7 +11,7 @@ Package manager is **pnpm** (pnpm-workspace.yaml at root).
 - `pnpm start` — serve the production build
 - `pnpm lint` — run ESLint (flat config, `eslint.config.mjs`, next/core-web-vitals + TypeScript)
 
-There is no test suite.
+There is no test suite. `.github/workflows/ci.yml` runs `pnpm lint`, `pnpm build`, and the `add-ui-component` validate script on every push to `main` and every PR.
 
 Deployed to Cloudflare Workers via `@opennextjs/cloudflare` (`wrangler.jsonc`, `open-next.config.ts`):
 
@@ -55,3 +55,8 @@ The candlestick "W" brand mark is rendered inline by `src/components/ui/animated
 ## Skills
 
 - `.claude/skills/add-ui-component` — step-by-step workflow for adding a component to the design-system library (pattern, token rules, barrel export, validation script). Use it whenever adding or reviewing `src/components/ui/` components.
+
+## Git conventions
+
+- Do not add `Co-Authored-By: Claude ...` trailers to commits in this repo.
+- When a commit message or PR description includes an attribution footer, use `Generated with [Claude Code](https://claude.com/claude-code) (<model name and version>)` — no robot emoji, and name the actual model used (e.g. `(Fable 5)`, `(Sonnet 5)`).
