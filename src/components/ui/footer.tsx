@@ -52,13 +52,13 @@ export function Footer({ columns = defaultColumns }: FooterProps) {
               </div>
               <div className="flex flex-col gap-2.5">
                 {c.links.map((l) => (
-                  <a
+                  <Link
                     key={l.label}
                     href={l.href ?? "#"}
                     className="font-display text-body-sm font-normal text-ink-inverse no-underline hover:underline"
                   >
                     {l.label}
-                  </a>
+                  </Link>
                 ))}
               </div>
             </div>

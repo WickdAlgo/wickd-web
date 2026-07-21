@@ -15,9 +15,17 @@ export interface NavBarProps {
   /** href of the link to highlight (usually the current pathname). */
   activeHref?: string;
   sticky?: boolean;
+  loginHref?: string;
+  signUpHref?: string;
 }
 
-export function NavBar({ links = [], activeHref, sticky = true }: NavBarProps) {
+export function NavBar({
+  links = [],
+  activeHref,
+  sticky = true,
+  loginHref,
+  signUpHref,
+}: NavBarProps) {
   return (
     <nav className={cx("z-50 border-b border-hairline bg-card py-4", sticky && "sticky top-0")}>
       <div className={cx(container, "flex items-center gap-6")}>
@@ -43,10 +51,12 @@ export function NavBar({ links = [], activeHref, sticky = true }: NavBarProps) {
           ))}
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="sm">
+          <Button variant="ghost" size="sm" href={loginHref}>
             Login
           </Button>
-          <Button size="sm">Sign up</Button>
+          <Button size="sm" href={signUpHref}>
+            Sign up
+          </Button>
         </div>
       </div>
     </nav>
