@@ -65,6 +65,13 @@
   --text-display-xl: 244px;
   --text-display-xl--line-height: 1;
   --text-display-xl--letter-spacing: 2.44px;
+  /* Responsive display sizes for page/hero H1s */
+  --text-display-page: clamp(56px, 7vw, 96px);
+  --text-display-page--line-height: 1.05;
+  --text-display-page--letter-spacing: 1.4px;
+  --text-display-hero: clamp(72px, 11vw, 150px);
+  --text-display-hero--line-height: 1;
+  --text-display-hero--letter-spacing: 1.5px;
 
   /* Radii — structures sharp, cards 6px, buttons full pills */
   --radius-sm: 2px;
@@ -123,30 +130,17 @@
   --color-marker: var(--color-cotton-candy);
 }
 
-/* Semantic aliases consumed by the component library (var(--surface-card) etc.) */
+/* Non-utility tokens: SVG paints, dynamic values, layout, and motion.
+ * Styling that lives in markup uses the Tailwind utilities above instead
+ * (bg-card, text-ink, border-hairline, …). */
 :root {
-  /* Surfaces */
+  /* Base surfaces & text (body defaults, SVG diagrams) */
   --surface-canvas: var(--color-concrete);
   --surface-card: var(--color-paper);
-  --surface-subtle: var(--color-mist);
-  --surface-wash: var(--color-smoke);
-  --surface-panel: var(--color-graphite);
-  --surface-inverse: var(--color-carbon);
-  /* Text */
   --text-primary: var(--color-obsidian);
   --text-secondary: var(--color-iron);
-  --text-tertiary: var(--color-slate);
-  --text-inverse: var(--color-paper);
   --text-inverse-muted: #9aa5a8;
-  --text-heading-deep: var(--color-deep-moss);
-  /* Borders */
-  --border-hairline: var(--color-concrete);
   --border-strong: var(--color-pebble);
-  --border-icon: var(--color-stone);
-  /* Action — the only filled CTA is Obsidian */
-  --action-primary: var(--color-obsidian);
-  --action-primary-text: var(--color-paper);
-  --action-focus: var(--color-cotton-candy);
   /* Market-structure semantics — the chart convention, direction first */
   --structure-bearish: var(--color-bear-rose);
   --structure-bullish: var(--color-bull-sage);
@@ -166,15 +160,11 @@
   /* Trade signals */
   --signal-long: var(--color-pulse-green);
   --signal-short: var(--color-alert-red);
-  --signal-long-deep: var(--color-forest-moss);
   /* Editorial emphasis */
   --highlight-marker: var(--color-cotton-candy);
-  /* Spacing (4px base), layout */
-  --spacing-unit: 4px;
+  /* Layout */
   --page-max-width: 1200px;
-  --section-gap: 64px;
   --card-padding: 24px;
-  --element-gap: 8px;
   /* Effects */
   --focus-ring: 0 0 0 3px rgba(91, 156, 246, 0.25);
   --transition-fast: 120ms ease;
@@ -203,21 +193,7 @@
   }
 }
 
-/* Motion — ambient hero drift + pipeline diagram */
-@keyframes wa-drift {
-  from {
-    transform: translateY(0);
-    opacity: 1;
-  }
-  to {
-    transform: translateY(-12px);
-    opacity: 0.8;
-  }
-}
-.wa-drift {
-  animation: wa-drift 10s ease-in-out infinite alternate;
-}
-
+/* Motion — pipeline glow + hero background reveals */
 @keyframes wa-glow {
   from {
     opacity: 0.5;
@@ -230,28 +206,30 @@
   animation: wa-glow 4s ease-in-out infinite alternate;
 }
 
-@keyframes wa-pop {
-  0%,
-  68% {
-    transform: scale(1);
-  }
-  80% {
-    transform: scale(1.22);
-  }
-  100% {
-    transform: scale(1);
-  }
+@keyframes wa-clip-left {
+  0%, 15% { clip-path: inset(0 100% 0 0); }
+  45%, 65% { clip-path: inset(0 0 0 0); }
+  85%, 100% { clip-path: inset(0 100% 0 0); }
 }
-.wa-pop {
-  animation: wa-pop 3s ease-in-out infinite;
-  transform-box: fill-box;
-  transform-origin: center;
+
+@keyframes wa-clip-right {
+  0%, 15% { clip-path: inset(0 0 0 100%); }
+  45%, 65% { clip-path: inset(0 0 0 0); }
+  85%, 100% { clip-path: inset(0 0 0 100%); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .wa-drift,
   .wa-glow,
-  .wa-pop {
-    animation: none;
+  .wa-clip {
+    /* !important so it also silences inline animation shorthands (hero blocks) */
+    animation: none !important;
   }
+}
+
+.wa-pattern-dots {
+  background-image: radial-gradient(rgba(0, 0, 0, 0.15) 2px, transparent 2px);
+  background-size: 16px 16px;
+  background-position: 0 0;
+  background-attachment: fixed;
+  transform: translateZ(0);
 }

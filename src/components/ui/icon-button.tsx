@@ -1,5 +1,5 @@
-"use client";
 import React from "react";
+import { cx } from "@/lib/cx";
 
 export interface IconButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -17,35 +17,29 @@ export function IconButton({
   color = "var(--color-concrete)",
   glyphColor,
   size = 36,
-  children,
+  className,
   style,
+  children,
   ...rest
 }: IconButtonProps) {
-  const [hover, setHover] = React.useState(false);
   return (
     <button
       type="button"
       aria-label={label}
       title={label}
+      className={cx(
+        "inline-flex cursor-pointer items-center justify-center rounded-icons border-none [transition:all_var(--transition-fast)] hover:opacity-85",
+        className,
+      )}
       style={{
         width: size,
         height: size,
-        borderRadius: "var(--radius-icons)",
         background: color,
         color:
           glyphColor ||
           (color === "var(--color-concrete)" ? "var(--text-primary)" : "var(--text-inverse)"),
-        border: "none",
-        cursor: "pointer",
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-        transition: "var(--transition-fast)",
-        opacity: hover ? 0.85 : 1,
         ...style,
       }}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
       {...rest}
     >
       {children}

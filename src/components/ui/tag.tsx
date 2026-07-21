@@ -1,4 +1,5 @@
 import React from "react";
+import { cx } from "@/lib/cx";
 
 export type TagTone =
   | "neutral"
@@ -14,68 +15,37 @@ export type TagTone =
   | "short"
   | "dark";
 
-export interface TagProps {
+export interface TagProps extends React.HTMLAttributes<HTMLSpanElement> {
   tone?: TagTone;
   /** Render label in the mono face (tickers, run IDs). */
   mono?: boolean;
-  children?: React.ReactNode;
-  style?: React.CSSProperties;
 }
 
-const tagColors: Record<TagTone, { bg: string; fg: string; bd?: string }> = {
-  neutral: {
-    bg: "var(--surface-subtle)",
-    fg: "var(--text-primary)",
-    bd: "var(--border-hairline)",
-  },
-  bullish: { bg: "var(--structure-bullish)", fg: "var(--text-primary)" },
-  bearish: { bg: "var(--structure-bearish)", fg: "var(--text-primary)" },
-  ic: { bg: "var(--structure-ic)", fg: "var(--text-inverse)" },
-  fvg: {
-    bg: "transparent",
-    fg: "var(--structure-fvg)",
-    bd: "var(--structure-fvg)",
-  },
-  ote: {
-    bg: "transparent",
-    fg: "var(--text-primary)",
-    bd: "var(--structure-ote)",
-  },
-  breaker: { bg: "var(--structure-breaker)", fg: "var(--text-primary)" },
-  sr: { bg: "var(--structure-sr)", fg: "var(--text-primary)" },
-  default: {
-    bg: "var(--surface-subtle)",
-    fg: "var(--text-secondary)",
-    bd: "var(--border-strong)",
-  },
-  long: { bg: "var(--signal-long)", fg: "var(--text-inverse)" },
-  short: { bg: "var(--signal-short)", fg: "var(--text-inverse)" },
-  dark: { bg: "var(--surface-inverse)", fg: "var(--text-inverse)" },
+const tones: Record<TagTone, string> = {
+  neutral: "border-hairline bg-subtle text-ink",
+  bullish: "border-transparent bg-bullish text-ink",
+  bearish: "border-transparent bg-bearish text-ink",
+  ic: "border-transparent bg-ic text-white",
+  fvg: "border-fvg bg-transparent text-fvg",
+  ote: "border-ote bg-transparent text-ink",
+  breaker: "border-transparent bg-breaker text-ink",
+  sr: "border-transparent bg-sr text-ink",
+  default: "border-strong bg-subtle text-ink-secondary",
+  long: "border-transparent bg-long text-white",
+  short: "border-transparent bg-short text-white",
+  dark: "border-transparent bg-inverse text-white",
 };
 
-export function Tag({ tone = "neutral", mono = false, children, style }: TagProps) {
-  const c = tagColors[tone] || tagColors.neutral;
+export function Tag({ tone = "neutral", mono = false, className, ...rest }: TagProps) {
   return (
     <span
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: "6px",
-        background: c.bg,
-        color: c.fg,
-        border: c.bd ? `1px solid ${c.bd}` : "1px solid transparent",
-        borderRadius: "var(--radius-buttons)",
-        padding: "3px 12px",
-        fontFamily: mono ? "var(--font-mono)" : "var(--font-ui)",
-        fontSize: "12px",
-        fontWeight: 500,
-        letterSpacing: "0.3px",
-        lineHeight: 1.5,
-        whiteSpace: "nowrap",
-        ...style,
-      }}
-    >
-      {children}
-    </span>
+      className={cx(
+        "inline-flex items-center gap-1.5 whitespace-nowrap rounded-buttons border px-3 py-[3px] text-caption font-medium",
+        tones[tone],
+        mono ? "font-mono" : "font-ui",
+        className,
+      )}
+      {...rest}
+    />
   );
 }

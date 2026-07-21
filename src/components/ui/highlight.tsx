@@ -1,23 +1,17 @@
 import React from "react";
+import { cx } from "@/lib/cx";
 
-export interface HighlightProps {
-  children?: React.ReactNode;
-  style?: React.CSSProperties;
-}
+export type HighlightProps = React.HTMLAttributes<HTMLSpanElement>;
 
 /** Cotton-candy marker emphasis for inline editorial text. */
-export function Highlight({ children, style }: HighlightProps) {
+export function Highlight({ className, ...rest }: HighlightProps) {
   return (
     <span
-      style={{
-        background: "var(--highlight-marker)",
-        padding: "0 4px",
-        boxDecorationBreak: "clone",
-        WebkitBoxDecorationBreak: "clone",
-        ...style,
-      }}
-    >
-      {children}
-    </span>
+      className={cx(
+        "bg-marker px-1 [-webkit-box-decoration-break:clone] [box-decoration-break:clone]",
+        className,
+      )}
+      {...rest}
+    />
   );
 }

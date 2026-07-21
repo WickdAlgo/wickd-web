@@ -1,6 +1,6 @@
 import { Button, Card, Highlight, SectionBand, Tag } from "@/components/ui";
-
-const wrap = "mx-auto max-w-(--page-max-width) px-6";
+import { container } from "@/lib/styles";
+import { cx } from "@/lib/cx";
 
 function Terminal({ lines }: { lines: string[] }) {
   return (
@@ -8,8 +8,7 @@ function Terminal({ lines }: { lines: string[] }) {
       {lines.map((l, i) => (
         <div
           key={i}
-          className="whitespace-pre"
-          style={{ color: l.startsWith("$") ? "var(--text-inverse)" : "var(--text-inverse-muted)" }}
+          className={cx("whitespace-pre", l.startsWith("$") ? "text-white" : "text-(--text-inverse-muted)")}
         >
           {l}
         </div>
@@ -18,33 +17,29 @@ function Terminal({ lines }: { lines: string[] }) {
   );
 }
 
-const statusCard = (title: string, items: string[]) => (
-  <Card>
-    <h3 className="font-display m-0 mb-2.5 text-[18px] font-semibold tracking-[0.4px]">{title}</h3>
-    <ul className="font-ui m-0 pl-4.5 text-[14px] leading-[1.7] tracking-[0.35px] text-ink-secondary">
-      {items.map((i) => (
-        <li key={i}>{i}</li>
-      ))}
-    </ul>
-  </Card>
-);
+function StatusCard({ title, items }: { title: string; items: string[] }) {
+  return (
+    <Card>
+      <h3 className="font-display m-0 mb-2.5 text-[18px] font-semibold tracking-[0.4px]">{title}</h3>
+      <ul className="font-ui m-0 pl-4.5 text-body-sm leading-[1.7] text-ink-secondary">
+        {items.map((i) => (
+          <li key={i}>{i}</li>
+        ))}
+      </ul>
+    </Card>
+  );
+}
 
 export default function EnginePage() {
   return (
     <main>
       <section className="py-16">
-        <div className={wrap}>
+        <div className={container}>
           <Tag mono>wickd-dotnet · .NET 10</Tag>
-          <h1
-            className="font-display mt-5 mb-0 max-w-[900px] font-semibold"
-            style={{ fontSize: "clamp(56px,7vw,96px)", lineHeight: 1.05, letterSpacing: "1.4px" }}
-          >
+          <h1 className="font-display mt-5 mb-0 max-w-[900px] text-display-page font-semibold">
             The engine journals what the market did.
           </h1>
-          <p
-            className="font-display mt-6 max-w-[640px]"
-            style={{ fontSize: 20, lineHeight: 1.4, letterSpacing: "0.5px" }}
-          >
+          <p className="font-display mt-6 max-w-[640px] text-subheading leading-[1.4]">
             Fetch and cache historical candles, replay them deterministically, and write{" "}
             <Highlight>structure events</Highlight> to a journal your strategies can trust.
           </p>
@@ -52,12 +47,12 @@ export default function EnginePage() {
       </section>
       <SectionBand color="var(--structure-ic)" />
       <section className="bg-card py-16">
-        <div className={`${wrap} grid grid-cols-1 items-start gap-12 lg:grid-cols-2`}>
+        <div className={cx(container, "grid grid-cols-1 items-start gap-12 lg:grid-cols-2")}>
           <div>
-            <h2 className="font-display text-heading m-0 mb-4 font-semibold">
+            <h2 className="font-display m-0 mb-4 text-heading font-semibold">
               From candles to structures in two commands
             </h2>
-            <p className="font-ui m-0 text-[14px] leading-normal tracking-[0.35px] text-ink-secondary">
+            <p className="font-ui m-0 text-body-sm leading-normal text-ink-secondary">
               The A1 → B path: HistoricalDataSource feeds the StructureEngine, which journals
               deterministic events for swings, equal highs/lows, liquidity breaches, sweeps,
               order blocks, and FVG events.
@@ -89,22 +84,26 @@ export default function EnginePage() {
       </section>
       <SectionBand color="var(--structure-bullish)" />
       <section className="py-16">
-        <div className={wrap}>
-          <h2 className="font-display text-heading m-0 mb-8 font-semibold">Honest about status</h2>
+        <div className={container}>
+          <h2 className="font-display m-0 mb-8 text-heading font-semibold">Honest about status</h2>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-            {statusCard("Implemented", [
-              "fetch, backtest, manage commands",
-              "Dataset aliases",
-              "Structure journaling",
-              "Binance USD-M via CCXT",
-            ])}
-            {statusCard("Placeholder", ["analyze — parses --run-id, returns not-implemented"])}
-            {statusCard("Not yet", [
-              "Setup & trade engines",
-              "Live execution",
-              "AI analyst agent",
-              "Dashboards",
-            ])}
+            <StatusCard
+              title="Implemented"
+              items={[
+                "fetch, backtest, manage commands",
+                "Dataset aliases",
+                "Structure journaling",
+                "Binance USD-M via CCXT",
+              ]}
+            />
+            <StatusCard
+              title="Placeholder"
+              items={["analyze — parses --run-id, returns not-implemented"]}
+            />
+            <StatusCard
+              title="Not yet"
+              items={["Setup & trade engines", "Live execution", "AI analyst agent", "Dashboards"]}
+            />
           </div>
         </div>
       </section>

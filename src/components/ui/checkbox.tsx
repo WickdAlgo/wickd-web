@@ -1,51 +1,41 @@
 "use client";
 import React from "react";
+import { cx } from "@/lib/cx";
+import { useControllable } from "@/lib/use-controllable";
+import { toggleClass } from "./field";
 
 export interface CheckboxProps {
   label?: React.ReactNode;
   checked?: boolean;
+  defaultChecked?: boolean;
   onChange?: (checked: boolean) => void;
   disabled?: boolean;
 }
 
-export function Checkbox({ label, checked, onChange, disabled }: CheckboxProps) {
-  const [c, setC] = React.useState(!!checked);
-  const isC = onChange ? checked : c;
+export function Checkbox({ label, checked, defaultChecked, onChange, disabled }: CheckboxProps) {
+  const [on, setOn] = useControllable(checked, defaultChecked ?? false);
   return (
-    <label
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 10,
-        cursor: disabled ? "default" : "pointer",
-        opacity: disabled ? 0.4 : 1,
-        fontFamily: "var(--font-ui)",
-        fontSize: "14px",
-        letterSpacing: "0.35px",
-      }}
-    >
+    <label className={toggleClass}>
+      <input
+        type="checkbox"
+        className="peer sr-only"
+        checked={on}
+        disabled={disabled}
+        onChange={(e) => {
+          setOn(e.target.checked);
+          onChange?.(e.target.checked);
+        }}
+      />
       <span
-        onClick={() => {
-          if (disabled) return;
-          if (onChange) onChange(!checked);
-          else setC(!c);
-        }}
-        style={{
-          width: 18,
-          height: 18,
-          borderRadius: "var(--radius-sm)",
-          border: `1px solid ${isC ? "var(--color-obsidian)" : "var(--border-strong)"}`,
-          background: isC ? "var(--color-obsidian)" : "var(--surface-card)",
-          display: "inline-flex",
-          alignItems: "center",
-          justifyContent: "center",
-          transition: "var(--transition-fast)",
-          flex: "none",
-        }}
+        aria-hidden="true"
+        className={cx(
+          "inline-flex size-[18px] flex-none items-center justify-center rounded-sm border [transition:all_var(--transition-fast)] peer-focus-visible:[box-shadow:var(--focus-ring)]",
+          on ? "border-ink bg-ink" : "border-strong bg-card",
+        )}
       >
-        {isC && (
+        {on && (
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--text-inverse)" strokeWidth="3.5">
-            <polyline points="20 6 9 17 4 12"></polyline>
+            <polyline points="20 6 9 17 4 12" />
           </svg>
         )}
       </span>

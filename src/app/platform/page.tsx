@@ -2,6 +2,7 @@
 import React from "react";
 import Link from "next/link";
 import { Tag } from "@/components/ui";
+import { cx } from "@/lib/cx";
 import { InspectView } from "@/components/platform/inspect-view";
 import { BacktestView } from "@/components/platform/backtest-view";
 import { DatasetsView } from "@/components/platform/datasets-view";
@@ -32,12 +33,10 @@ export default function PlatformPage() {
             key={n.id}
             type="button"
             onClick={() => setView(n.id)}
-            className="font-display cursor-pointer rounded-buttons border-none px-3 py-[9px] text-left text-[14px] font-medium tracking-[0.35px]"
-            style={{
-              background: view === n.id ? "var(--color-obsidian)" : "transparent",
-              color: view === n.id ? "var(--text-inverse)" : "var(--text-primary)",
-              transition: "var(--transition-fast)",
-            }}
+            className={cx(
+              "font-display cursor-pointer rounded-buttons border-none px-3 py-[9px] text-left text-body-sm font-medium [transition:all_var(--transition-fast)]",
+              view === n.id ? "bg-ink text-ink-inverse" : "bg-transparent text-ink",
+            )}
           >
             {n.label}
           </button>

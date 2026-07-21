@@ -1,5 +1,7 @@
 "use client";
 import React from "react";
+import { cx } from "@/lib/cx";
+import { useControllable } from "@/lib/use-controllable";
 
 export interface TabsProps {
   items?: string[];
@@ -10,50 +12,37 @@ export interface TabsProps {
 }
 
 export function Tabs({ items = [], active, onChange, dark = false }: TabsProps) {
-  const [a, setA] = React.useState(active || items[0]);
-  const cur = onChange ? active : a;
+  const [current, setCurrent] = useControllable(active, items[0]);
   return (
-    <div
-      style={{
-        display: "flex",
-        gap: 4,
-        borderBottom: `1px solid ${dark ? "var(--color-graphite)" : "var(--border-hairline)"}`,
-      }}
-    >
-      {items.map((t) => (
-        <button
-          key={t}
-          type="button"
-          onClick={() => {
-            if (onChange) onChange(t);
-            else setA(t);
-          }}
-          style={{
-            fontFamily: "var(--font-display)",
-            fontSize: "14px",
-            fontWeight: 500,
-            letterSpacing: "0.35px",
-            padding: "10px 14px",
-            background: "transparent",
-            border: "none",
-            borderBottom: `2px solid ${
-              cur === t ? (dark ? "var(--text-inverse)" : "var(--color-obsidian)") : "transparent"
-            }`,
-            color:
-              cur === t
+    <div role="tablist" className={cx("flex gap-1 border-b", dark ? "border-graphite" : "border-hairline")}>
+      {items.map((t) => {
+        const selected = current === t;
+        return (
+          <button
+            key={t}
+            type="button"
+            role="tab"
+            aria-selected={selected}
+            onClick={() => {
+              setCurrent(t);
+              onChange?.(t);
+            }}
+            className={cx(
+              "-mb-px cursor-pointer border-0 border-b-2 border-solid bg-transparent px-3.5 py-2.5 font-display text-body-sm font-medium",
+              selected
                 ? dark
-                  ? "var(--text-inverse)"
-                  : "var(--text-primary)"
-                : dark
-                  ? "var(--text-inverse-muted)"
-                  : "var(--text-secondary)",
-            cursor: "pointer",
-            marginBottom: -1,
-          }}
-        >
-          {t}
-        </button>
-      ))}
+                  ? "border-white text-white"
+                  : "border-ink text-ink"
+                : cx(
+                    "border-transparent",
+                    dark ? "text-(--text-inverse-muted)" : "text-ink-secondary",
+                  ),
+            )}
+          >
+            {t}
+          </button>
+        );
+      })}
     </div>
   );
 }

@@ -1,5 +1,6 @@
-"use client";
 import React from "react";
+import Link from "next/link";
+import { cx } from "@/lib/cx";
 
 export type ButtonVariant = "primary" | "secondary" | "ghost" | "inverse";
 export type ButtonSize = "sm" | "md" | "lg";
@@ -10,67 +11,56 @@ export interface ButtonProps
   size?: ButtonSize;
   /** Append the typographic → arrow after the label. */
   arrow?: boolean;
+  /** Render as an anchor while keeping button styling. */
+  href?: string;
 }
 
-const variants: Record<ButtonVariant, React.CSSProperties> = {
-  primary: {
-    background: "var(--action-primary)",
-    color: "var(--action-primary-text)",
-  },
-  secondary: {
-    background: "var(--surface-card)",
-    color: "var(--text-primary)",
-    border: "1px solid var(--border-strong)",
-  },
-  ghost: { background: "transparent", color: "var(--text-primary)" },
-  inverse: { background: "var(--surface-card)", color: "var(--text-primary)" },
+const base =
+  "inline-flex cursor-pointer items-center gap-2 rounded-buttons border border-solid font-display font-medium leading-[1.2] tracking-[0.4px] no-underline [transition:all_var(--transition-fast)] disabled:cursor-default disabled:opacity-40";
+
+const variants: Record<ButtonVariant, string> = {
+  primary: "border-transparent bg-ink text-ink-inverse hover:opacity-[0.88]",
+  secondary: "border-strong bg-card text-ink hover:opacity-[0.88]",
+  ghost: "border-transparent bg-transparent text-ink hover:underline",
+  inverse: "border-transparent bg-card text-ink hover:opacity-[0.88]",
+};
+
+const sizes: Record<ButtonSize, string> = {
+  sm: "px-4 py-2 text-[14px]",
+  md: "px-6 py-3 text-[16px]",
+  lg: "px-8 py-4 text-[18px]",
 };
 
 export function Button({
   variant = "primary",
   size = "md",
   arrow = false,
+  href,
+  className,
   children,
-  style,
   ...rest
 }: ButtonProps) {
-  const pad = size === "lg" ? "16px 32px" : size === "sm" ? "8px 16px" : "12px 24px";
-  const fs = size === "lg" ? "18px" : size === "sm" ? "14px" : "16px";
-  const base: React.CSSProperties = {
-    fontFamily: "var(--font-display)",
-    fontWeight: 500,
-    fontSize: fs,
-    letterSpacing: "0.4px",
-    borderRadius: "var(--radius-buttons)",
-    padding: pad,
-    cursor: "pointer",
-    display: "inline-flex",
-    alignItems: "center",
-    gap: "8px",
-    border: "1px solid transparent",
-    transition: "var(--transition-fast)",
-    lineHeight: 1.2,
-    textDecoration: "none",
-  };
-  const [hover, setHover] = React.useState(false);
-  const hoverFx: React.CSSProperties =
-    variant === "ghost" ? { textDecoration: "underline" } : { opacity: 0.88 };
-  return (
-    <button
-      type="button"
-      style={{
-        ...base,
-        ...variants[variant],
-        ...(hover ? hoverFx : {}),
-        ...(rest.disabled ? { opacity: 0.4, cursor: "default" } : {}),
-        ...style,
-      }}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      {...rest}
-    >
+  const classes = cx(base, variants[variant], sizes[size], className);
+  const content = (
+    <>
       {children}
       {arrow && <span aria-hidden="true">→</span>}
+    </>
+  );
+  if (href) {
+    return (
+      <Link
+        {...(rest as React.ComponentPropsWithoutRef<typeof Link>)}
+        href={href}
+        className={classes}
+      >
+        {content}
+      </Link>
+    );
+  }
+  return (
+    <button type="button" className={classes} {...rest}>
+      {content}
     </button>
   );
 }
