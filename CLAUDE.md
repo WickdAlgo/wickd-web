@@ -11,7 +11,7 @@ Package manager is **pnpm** (pnpm-workspace.yaml at root).
 - `pnpm start` — serve the production build
 - `pnpm lint` — run ESLint (flat config, `eslint.config.mjs`, next/core-web-vitals + TypeScript)
 
-There is no test suite.
+There is no test suite. `.github/workflows/ci.yml` runs `pnpm lint`, `pnpm build`, and the `add-ui-component` validate script on every push to `main` and every PR.
 
 Deployed to Cloudflare Workers via `@opennextjs/cloudflare` (`wrangler.jsonc`, `open-next.config.ts`):
 
