@@ -22,7 +22,7 @@ export interface StructureBlockProps {
   style?: React.CSSProperties;
 }
 
-const sbFills: Record<string, string> = {
+const fills: Partial<Record<StructureKind, string>> = {
   bullish: "var(--structure-bullish)",
   bearish: "var(--structure-bearish)",
   ic: "var(--structure-ic)",
@@ -30,7 +30,7 @@ const sbFills: Record<string, string> = {
   sr: "var(--structure-sr)",
   default: "var(--structure-default)",
 };
-const sbOutlined: Record<string, string> = {
+const edges: Partial<Record<StructureKind, string>> = {
   fvg: "var(--structure-fvg)",
   ote: "var(--structure-ote)",
 };
@@ -44,38 +44,20 @@ export function StructureBlock({
   label,
   style,
 }: StructureBlockProps) {
-  const edge = sbOutlined[kind];
-  const alpha =
-    scope === "internal"
-      ? "var(--structure-internal-alpha)"
-      : "var(--structure-external-alpha)";
+  const edge = edges[kind];
   return (
-    <div style={{ width, height, position: "relative", borderRadius: 0, ...style }}>
+    <div className="relative rounded-none" style={{ width, height, ...style }}>
       <div
         aria-hidden="true"
+        className="absolute inset-0 box-border"
         style={{
-          position: "absolute",
-          inset: 0,
-          background: edge ? "transparent" : sbFills[kind] || sbFills.default,
+          background: edge ? "transparent" : fills[kind] ?? fills.default,
           border: edge ? `2px solid ${edge}` : "none",
-          opacity: alpha as React.CSSProperties["opacity"],
-          boxSizing: "border-box",
+          opacity: `var(--structure-${scope}-alpha)`,
         }}
-      ></div>
+      />
       {label && (
-        <span
-          style={{
-            position: "absolute",
-            left: 0,
-            top: "100%",
-            marginTop: 4,
-            fontFamily: "var(--font-mono)",
-            fontSize: "9px",
-            letterSpacing: "0.3px",
-            color: "var(--text-primary)",
-            whiteSpace: "nowrap",
-          }}
-        >
+        <span className="absolute left-0 top-full mt-1 whitespace-nowrap font-mono text-[9px] tracking-[0.3px] text-ink">
           {label}
         </span>
       )}

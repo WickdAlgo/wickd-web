@@ -74,51 +74,17 @@ export function CandleChart({
     liqI = swHi;
   return (
     <div
-      style={{
-        background: "var(--chart-canvas)",
-        border: "1px solid var(--border-hairline)",
-        borderRadius: "var(--radius-cards)",
-        overflow: "hidden",
-        position: "relative",
-        ...style,
-      }}
+      className="relative overflow-hidden rounded-cards border border-hairline bg-(--chart-canvas)"
+      style={style}
     >
-      <div
-        style={{
-          display: "flex",
-          gap: 12,
-          alignItems: "center",
-          padding: "10px 14px",
-          borderBottom: "1px solid var(--border-hairline)",
-          background: "var(--surface-card)",
-        }}
-      >
-        <span
-          style={{
-            fontFamily: "var(--font-mono)",
-            fontSize: "12px",
-            color: "var(--text-primary)",
-            letterSpacing: "0.3px",
-          }}
-        >
-          {market}
-        </span>
-        <span style={{ fontFamily: "var(--font-mono)", fontSize: "12px", color: "var(--text-secondary)" }}>
-          {timeframe}
-        </span>
-        <span
-          style={{
-            marginLeft: "auto",
-            fontFamily: "var(--font-ui)",
-            fontSize: "11px",
-            color: "var(--text-secondary)",
-            letterSpacing: "0.3px",
-          }}
-        >
+      <div className="flex items-center gap-3 border-b border-hairline bg-card px-3.5 py-2.5">
+        <span className="font-mono text-caption text-ink">{market}</span>
+        <span className="font-mono text-caption text-ink-secondary">{timeframe}</span>
+        <span className="font-ui ml-auto text-[11px] tracking-[0.3px] text-ink-secondary">
           deterministic replay
         </span>
       </div>
-      <svg viewBox={`0 0 ${W} ${H}`} style={{ display: "block", width, height }} preserveAspectRatio="none">
+      <svg viewBox={`0 0 ${W} ${H}`} className="block" style={{ width, height }} preserveAspectRatio="none">
         {[0.25, 0.5, 0.75].map((t) => (
           <line
             key={t}

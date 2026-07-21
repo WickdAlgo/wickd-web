@@ -18,8 +18,11 @@ export { Input, type InputProps } from "./input";
 export { Select, type SelectProps, type SelectOption } from "./select";
 export { Checkbox, type CheckboxProps } from "./checkbox";
 export { Switch, type SwitchProps } from "./switch";
+// Forms (shared scaffolding)
+export { Field, type FieldProps } from "./field";
 // Navigation
-export { NavBar, type NavBarProps } from "./nav-bar";
+export { NavBar, type NavBarProps, type NavLink } from "./nav-bar";
+export { AnimatedLogo, type AnimatedLogoProps } from "./animated-logo";
 export { Footer, type FooterProps, type FooterColumn } from "./footer";
 export { Tabs, type TabsProps } from "./tabs";
 export { SectionBand, type SectionBandProps } from "./section-band";

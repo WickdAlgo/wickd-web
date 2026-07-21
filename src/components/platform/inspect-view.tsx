@@ -10,8 +10,7 @@ import {
   Tag,
   type TagTone,
 } from "@/components/ui";
-
-const panel = "bg-card border border-hairline rounded-cards";
+import { panel } from "@/lib/styles";
 
 const events: { time: string; kind: TagTone; label: string; detail: string }[] = [
   { time: "14:35:00Z", kind: "fvg", label: "FVG · bullish", detail: "gap 64,230 → 64,410 · displacement candle" },

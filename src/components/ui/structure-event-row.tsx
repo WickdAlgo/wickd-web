@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import { cx } from "@/lib/cx";
 import { Tag, type TagTone } from "./tag";
 
 export interface StructureEventRowProps {
@@ -21,59 +22,25 @@ export function StructureEventRow({
   onInspect,
   selected = false,
 }: StructureEventRowProps) {
-  const [hover, setHover] = React.useState(false);
   return (
     <div
+      role={onInspect ? "button" : undefined}
+      tabIndex={onInspect ? 0 : undefined}
       onClick={onInspect}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 14,
-        padding: "10px 16px",
-        borderBottom: "1px solid var(--border-hairline)",
-        background: selected
-          ? "var(--surface-subtle)"
-          : hover
-            ? "var(--surface-subtle)"
-            : "transparent",
-        cursor: onInspect ? "pointer" : "default",
-        transition: "var(--transition-fast)",
-      }}
+      onKeyDown={onInspect ? (e) => e.key === "Enter" && onInspect() : undefined}
+      className={cx(
+        "group flex items-center gap-3.5 border-b border-hairline px-4 py-2.5 [transition:all_var(--transition-fast)]",
+        selected ? "bg-subtle" : "hover:bg-subtle",
+        onInspect && "cursor-pointer",
+      )}
     >
-      <span
-        style={{
-          fontFamily: "var(--font-mono)",
-          fontSize: "12px",
-          color: "var(--text-secondary)",
-          width: 150,
-          flex: "none",
-          letterSpacing: "0.3px",
-        }}
-      >
-        {time}
-      </span>
+      <span className="w-[150px] flex-none font-mono text-caption text-ink-secondary">{time}</span>
       <Tag tone={kind}>{label || kind}</Tag>
-      <span
-        style={{
-          fontFamily: "var(--font-ui)",
-          fontSize: "13px",
-          letterSpacing: "0.3px",
-          color: "var(--text-primary)",
-          flex: 1,
-          whiteSpace: "nowrap",
-          overflow: "hidden",
-          textOverflow: "ellipsis",
-        }}
-      >
+      <span className="font-ui flex-1 truncate text-[13px] tracking-[0.3px] text-ink">
         {detail}
       </span>
       {onInspect && (
-        <span
-          aria-hidden="true"
-          style={{ fontFamily: "var(--font-display)", fontSize: "14px", opacity: hover ? 1 : 0.3 }}
-        >
+        <span aria-hidden="true" className="font-display text-body-sm opacity-30 group-hover:opacity-100">
           →
         </span>
       )}

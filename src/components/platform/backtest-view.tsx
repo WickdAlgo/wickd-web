@@ -1,8 +1,7 @@
 "use client";
 import React from "react";
 import { Button, Checkbox, Input, Select, StatCard, Tag } from "@/components/ui";
-
-const panel = "bg-card border border-hairline rounded-cards";
+import { panel } from "@/lib/styles";
 
 const doneJournal = `{"t":"2026-05-06T14:20:00Z","kind":"orderblock","side":"bullish","lo":64050,"hi":64180}
 {"t":"2026-05-06T14:35:00Z","kind":"fvg","side":"bullish","lo":64230,"hi":64410}
@@ -32,8 +31,8 @@ export function BacktestView() {
           <Select label="Dataset alias" mono options={["may6-session", "apr-range", "q1-trend"]} defaultValue="may6-session" />
           <Input label="Run ID" mono defaultValue="phase-3-smoke" hint="Writes runs/{runId}/structures.jsonl" />
           <div className="flex flex-col gap-2.5 py-1">
-            <Checkbox label="Emit lifecycle updates" checked onChange={() => {}} />
-            <Checkbox label="Journal equal highs/lows" checked onChange={() => {}} />
+            <Checkbox label="Emit lifecycle updates" defaultChecked />
+            <Checkbox label="Journal equal highs/lows" defaultChecked />
             <Checkbox label="Overwrite existing run" />
           </div>
           <Button arrow onClick={run} disabled={running}>
