@@ -48,9 +48,9 @@ export function Button({
   );
   if (href) {
     return (
-      <a href={href} className={classes}>
+      <Link href={href} className={classes} {...(rest as React.ComponentPropsWithoutRef<typeof Link>)}>
         {content}
-      </a>
+      </Link>
     );
   }
   return (
