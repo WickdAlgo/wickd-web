@@ -34,7 +34,7 @@ export function IconButton({
         background: color,
         color:
           glyphColor ||
-          (color === "var(--color-concrete)" ? "var(--text-primary)" : "var(--color-paper)"),
+          (color === "var(--color-concrete)" ? "var(--text-primary)" : "var(--text-inverse)"),
         border: "none",
         cursor: "pointer",
         display: "inline-flex",
