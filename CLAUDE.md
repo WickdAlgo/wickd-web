@@ -18,7 +18,7 @@ Deployed to Cloudflare Workers via `@opennextjs/cloudflare` (`wrangler.jsonc`, `
 - `pnpm preview` — build and serve the Worker locally via Wrangler
 - `pnpm deploy` — build and deploy to Cloudflare Workers
 
-The site is fully static (no ISR, no `next/image`, no API routes), so the config intentionally omits the R2 incremental-cache and Images bindings the adapter's `migrate` scaffolder adds by default — add them back only if the app gains dynamic rendering or image optimization.
+The site is fully static (no ISR, no `next/image`, no API routes), so the config intentionally omits the R2 incremental-cache and Images bindings the adapter's `migrate` scaffolder adds by default — add them back only if the app gains dynamic rendering or image optimization. The `WORKER_SELF_REFERENCE` service binding in `wrangler.jsonc` is **not** just for R2 caching, though — removing it breaks `/` with a Cloudflare 1042 error (OpenNext's bundled server does an internal self-fetch even on a static site). Keep it.
 
 ## What this is
 

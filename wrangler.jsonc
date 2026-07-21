@@ -2,6 +2,7 @@
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"main": ".open-next/worker.js",
 	"name": "wickd-web",
+	"workers_dev": true,
 	"build": {
 		"command": "npx opennextjs-cloudflare build"
 	},
@@ -13,5 +14,14 @@
 	"assets": {
 		"directory": ".open-next/assets",
 		"binding": "ASSETS"
-	}
+	},
+	"services": [
+		{
+			// Self-reference service binding, the service name must match the worker name.
+			// Required so the Worker's own internal requests don't get blocked as a same-zone loop.
+			// See https://opennext.js.org/cloudflare/caching
+			"binding": "WORKER_SELF_REFERENCE",
+			"service": "wickd-web"
+		}
+	]
 }
