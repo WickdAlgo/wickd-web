@@ -1,55 +1,30 @@
 import {
+  AnimatedLogo,
   Button,
   Card,
   CandleChart,
   GradientUnderline,
   Highlight,
   SectionBand,
-  StructureBlock,
   Tag,
   type TagTone,
 } from "@/components/ui";
+import { container } from "@/lib/styles";
+import { cx } from "@/lib/cx";
 import { PipelineSection } from "@/components/home/pipeline-section";
-
-const wrap = "mx-auto max-w-(--page-max-width) px-6";
-
-const heroBlocks = [
-  { kind: "bullish", width: 170, height: 54, right: "16%", top: 64, dur: "9s", delay: "-2s" },
-  { kind: "fvg", width: 220, height: 30, right: "6%", top: 170, dur: "12s", delay: "-5s" },
-  { kind: "bearish", width: 140, height: 10, right: "24%", top: 250, dur: "8s", delay: "-1s" },
-  { kind: "ic", width: 56, height: 120, right: "11%", top: 290, dur: "13s", delay: "-7s" },
-  { kind: "breaker", width: 100, height: 36, right: "30%", top: 120, dur: "10s", delay: "-4s" },
-] as const;
+import { HeroBackground } from "@/components/home/hero-background";
 
 function Hero() {
   return (
-    <section className="relative overflow-hidden pt-18 pb-22">
-      {heroBlocks.map((b) => (
-        <div
-          key={b.kind}
-          className="wa-drift"
-          style={{
-            position: "absolute",
-            right: b.right,
-            top: b.top,
-            zIndex: 0,
-            animationDuration: b.dur,
-            animationDelay: b.delay,
-          }}
-        >
-          <StructureBlock kind={b.kind} width={b.width} height={b.height} />
-        </div>
-      ))}
-      <div className={`${wrap} relative z-1`}>
-        <h1
-          className="font-display font-semibold m-0"
-          style={{ fontSize: "clamp(72px, 11vw, 150px)", lineHeight: 1, letterSpacing: "1.5px" }}
-        >
+    <section className="relative flex min-h-[600px] flex-col justify-center overflow-hidden pt-18 pb-22">
+      <HeroBackground />
+      <div className={cx(container, "relative z-10 w-full")}>
+        <h1 className="font-display m-0 text-display-hero font-semibold">
           Market structure,
           <br />
           made visible.
         </h1>
-        <p className="font-display mt-7 max-w-[620px]" style={{ fontSize: 24, lineHeight: 1.4, letterSpacing: "0.6px" }}>
+        <p className="font-display mt-7 max-w-[620px] text-heading-sm font-normal leading-[1.4]">
           WickdAlgo turns complex price action into{" "}
           <Highlight>deterministic, measurable structures</Highlight> — swings, order blocks,
           FVGs, liquidity — that traders and strategy agents consume through stable contracts.
@@ -58,7 +33,7 @@ function Hero() {
           <Button size="lg" arrow>
             Inspect a structure
           </Button>
-          <Button variant="ghost" size="lg">
+          <Button variant="ghost" size="lg" href="/engine">
             Read the engine docs
           </Button>
         </div>
@@ -93,8 +68,8 @@ function Features() {
   ];
   return (
     <section className="bg-card py-18">
-      <div className={wrap}>
-        <h2 className="font-display text-heading-lg font-semibold m-0 mb-10 max-w-[700px]">
+      <div className={container}>
+        <h2 className="font-display m-0 mb-10 max-w-[700px] text-heading-lg font-semibold">
           One reliable language of{" "}
           <GradientUnderline color="var(--structure-bullish)">structure</GradientUnderline>
         </h2>
@@ -102,10 +77,10 @@ function Features() {
           {items.map((f) => (
             <Card key={f.tag}>
               <Tag tone={f.tone}>{f.tag}</Tag>
-              <h3 className="font-display font-semibold text-[20px] tracking-[0.5px] mt-3.5 mb-2">
+              <h3 className="font-display mt-3.5 mb-2 text-subheading font-semibold">
                 {f.title}
               </h3>
-              <p className="font-ui text-[14px] leading-normal tracking-[0.35px] text-ink-secondary m-0">
+              <p className="font-ui m-0 text-body-sm leading-normal text-ink-secondary">
                 {f.body}
               </p>
             </Card>
@@ -119,16 +94,16 @@ function Features() {
 function ChartSection() {
   return (
     <section className="py-18">
-      <div className={`${wrap} grid grid-cols-1 items-center gap-12 lg:grid-cols-[380px_1fr]`}>
+      <div className={cx(container, "grid grid-cols-1 items-center gap-12 lg:grid-cols-[380px_1fr]")}>
         <div>
-          <h2 className="font-display text-heading font-semibold m-0">
+          <h2 className="font-display m-0 text-heading font-semibold">
             Inspect structures on the chart, not in a log
           </h2>
-          <p className="font-ui text-[15px] leading-normal tracking-[0.35px] text-ink-secondary my-4">
+          <p className="font-ui my-4 text-[15px] leading-normal tracking-[0.35px] text-ink-secondary">
             Order blocks, fair value gaps, and liquidity zones render as flat, verifiable
             rectangles over replayed candles. What the engine journals is what you see.
           </p>
-          <Button variant="secondary" arrow>
+          <Button variant="secondary" arrow href="/platform">
             Run a backtest
           </Button>
         </div>
@@ -171,8 +146,8 @@ function Layers() {
   ];
   return (
     <section className="bg-subtle py-18">
-      <div className={wrap}>
-        <h2 className="font-display text-heading-lg font-semibold m-0 mb-10">
+      <div className={container}>
+        <h2 className="font-display m-0 mb-10 text-heading-lg font-semibold">
           A modular operating layer
         </h2>
         <div className="flex flex-col">
@@ -182,10 +157,10 @@ function Layers() {
               className="flex flex-wrap items-baseline gap-x-8 gap-y-2 border-t border-strong py-5.5"
             >
               <span className="font-mono w-8 flex-none text-[13px] text-ink-secondary">{r.n}</span>
-              <span className="font-display w-70 flex-none text-[24px] font-semibold tracking-[0.6px]">
+              <span className="font-display w-70 flex-none text-heading-sm font-semibold">
                 {r.t}
               </span>
-              <span className="font-ui flex-1 basis-60 text-[14px] leading-normal tracking-[0.35px] text-ink-secondary">
+              <span className="font-ui flex-1 basis-60 text-body-sm leading-normal text-ink-secondary">
                 {r.d}
               </span>
               <Tag tone={r.tone}>{r.s}</Tag>
@@ -200,8 +175,13 @@ function Layers() {
 function CtaBand() {
   return (
     <section className="bg-card py-22">
-      <div className={`${wrap} text-center`}>
-        <h2 className="font-display text-display font-semibold m-0">
+      <div className={cx(container, "text-center")}>
+        <div className="mb-9 flex justify-center">
+          <span className="wa-brand inline-flex" title="Replay the chart">
+            <AnimatedLogo variant="full" size={180} />
+          </span>
+        </div>
+        <h2 className="font-display m-0 text-display font-semibold">
           Build on structures,
           <br />
           not on <Highlight>signals</Highlight>.
@@ -210,7 +190,7 @@ function CtaBand() {
           <Button size="lg" arrow>
             Sign up
           </Button>
-          <Button variant="secondary" size="lg">
+          <Button variant="secondary" size="lg" href="/engine">
             Explore the CLI
           </Button>
         </div>
