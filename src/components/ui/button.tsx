@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 import { cx } from "@/lib/cx";
 
 export type ButtonVariant = "primary" | "secondary" | "ghost" | "inverse";
