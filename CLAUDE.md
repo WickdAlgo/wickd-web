@@ -48,3 +48,8 @@ The candlestick "W" brand mark is rendered inline by `src/components/ui/animated
 ## Skills
 
 - `.claude/skills/add-ui-component` — step-by-step workflow for adding a component to the design-system library (pattern, token rules, barrel export, validation script). Use it whenever adding or reviewing `src/components/ui/` components.
+
+## Git conventions
+
+- Do not add `Co-Authored-By: Claude ...` trailers to commits in this repo.
+- When a commit message or PR description includes an attribution footer, use `Generated with [Claude Code](https://claude.com/claude-code) (<model name and version>)` — no robot emoji, and name the actual model used (e.g. `(Fable 5)`, `(Sonnet 5)`).
