@@ -3,6 +3,7 @@ import React from "react";
 import Link from "next/link";
 import { Tag } from "@/components/ui";
 import { cx } from "@/lib/cx";
+import { WEB_VERSION } from "@/lib/version";
 import { InspectView } from "@/components/platform/inspect-view";
 import { BacktestView } from "@/components/platform/backtest-view";
 import { DatasetsView } from "@/components/platform/datasets-view";
@@ -42,7 +43,7 @@ export default function PlatformPage() {
           </button>
         ))}
         <div className="mt-auto px-2.5">
-          <Tag mono>v0.1.0-preview</Tag>
+          <Tag mono>{WEB_VERSION}</Tag>
         </div>
       </aside>
       <main className="min-w-0 flex-1 px-6 py-5">

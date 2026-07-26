@@ -10,5 +10,13 @@ const links: NavLink[] = [
 ];
 
 export function SiteNav() {
-  return <NavBar links={links} activeHref={usePathname()} />;
+  return (
+    <NavBar
+      links={links}
+      activeHref={usePathname()}
+      // Stand-ins until auth exists — there is no /login or /signup route yet.
+      loginHref="/platform"
+      signUpHref="/platform"
+    />
+  );
 }
