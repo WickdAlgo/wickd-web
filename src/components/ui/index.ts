@@ -13,6 +13,11 @@ export {
 } from "./structure-block";
 export { Card, type CardProps, type CardElevation } from "./card";
 export { StatCard, type StatCardProps } from "./stat-card";
+export {
+  VersionList,
+  type VersionListProps,
+  type BuildVersion,
+} from "./version-list";
 // Forms
 export { Input, type InputProps } from "./input";
 export { Select, type SelectProps, type SelectOption } from "./select";

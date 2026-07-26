@@ -1,6 +1,6 @@
 {
   "name": "wickd-web",
-  "version": "0.1.0",
+  "version": "0.1.0-preview",
   "private": true,
   "packageManager": "pnpm@11.12.0",
   "scripts": {

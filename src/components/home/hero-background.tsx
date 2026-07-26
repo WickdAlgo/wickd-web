@@ -29,8 +29,11 @@ const blocks = [
 export function HeroBackground() {
   return (
     <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden flex justify-center">
-      <div 
-        className="w-full h-full max-w-[1600px] relative"
+      {/* 20 cols / 12 rows = 5/3. Locking that ratio keeps every cell square at any
+          viewport; the composition is sized to cover and centre-cropped instead of
+          stretching into tall slivers on narrow screens. */}
+      <div
+        className="h-full min-w-full shrink-0 aspect-[5/3] relative"
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(20, 1fr)",
