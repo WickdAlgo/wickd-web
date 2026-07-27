@@ -134,15 +134,23 @@ export function AnimatedLogo({ size = 28, variant = "compact" }: AnimatedLogoPro
         const bodyDelay = { animationDelay: `${i * v.staggerMs + 100}ms` };
         return (
           <g key={i} className={dir}>
-            <rect className="wick" x={wickX} y={wickY} width={v.wickW} height={wickH} fill="var(--chart-stroke)" style={wickDelay} />
+            <rect
+              className="wick"
+              x={wickX}
+              y={wickY}
+              width={v.wickW}
+              height={wickH}
+              fill="var(--color-obsidian)"
+              style={wickDelay}
+            />
             <g className="body" style={bodyDelay}>
-              <rect x={bodyX} y={bodyY} width={v.bodyW} height={bodyH} fill="var(--chart-stroke)" />
+              <rect x={bodyX} y={bodyY} width={v.bodyW} height={bodyH} fill="var(--color-obsidian)" />
               <rect
                 x={bodyX + v.border}
                 y={bodyY + v.border}
                 width={v.bodyW - v.border * 2}
                 height={bodyH - v.border * 2}
-                fill={dir === "up" ? "var(--chart-up-body)" : "var(--chart-down-body)"}
+                fill={dir === "up" ? "var(--color-paper)" : "var(--color-down-coral)"}
               />
             </g>
           </g>
