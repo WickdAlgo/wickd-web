@@ -2,7 +2,7 @@
   "name": "wickd-web",
   "version": "0.1.0-preview",
   "private": true,
-  "packageManager": "pnpm@11.12.0",
+  "packageManager": "pnpm@11.17.0",
   "scripts": {
     "build": "opennextjs-cloudflare build",
     "build:next": "next build",
