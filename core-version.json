@@ -1,4 +1,4 @@
 {
   "$comment": "Version of Wickd.Core, which ships from wickd-dotnet and has no source of truth in this repo. Rewritten by .github/workflows/core-version.yml when that repo publishes a release — edit by hand only to correct a bad sync.",
-  "version": "0.1.0"
+  "version": "0.1.0-preview.1"
 }
