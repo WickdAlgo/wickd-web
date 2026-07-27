@@ -1,48 +1,23 @@
-import { spawnSync } from "node:child_process";
 import type { NextConfig } from "next";
 import { version } from "./package.json";
-
-/** What the nav shows for Core when neither the env var nor the CLI answers. */
-const CORE_FALLBACK = "0.1.0";
-
-/**
- * Wickd.CLI wraps Wickd.Core, so `wickd --version` is the closest thing this repo
- * has to a source of truth for Core's number.
- *
- * It only resolves where the CLI is installed — a local build, or a CI runner that
- * installs it first. Cloudflare's Workers Builds container does not have it, and the
- * Workers runtime has no shell at all, so this can never be anything but build time.
- * Every failure path is non-fatal: a missing CLI falls through to the constant rather
- * than breaking the build.
- */
-function coreVersionFromCli(): string | undefined {
-  const res = spawnSync("wickd", ["--version"], {
-    encoding: "utf8",
-    timeout: 5_000,
-  });
-  if (res.error) return undefined;
-  // Some CLIs print the banner to stderr; a semver match is the real validation.
-  const out = `${res.stdout ?? ""}${res.stderr ?? ""}`;
-  const semver = /\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.]+)*/;
-  // Prefer a Core-labelled number. A wrapper that reports both — "Wickd.CLI 1.2.3
-  // (Wickd.Core 0.7.1)" — leads with its own version, which is not what we want.
-  const labelled = out.match(new RegExp(`core[^0-9]*(${semver.source})`, "i"));
-  return labelled?.[1] ?? out.match(semver)?.[0];
-}
-
-/* Explicit env var wins, so a build host without the CLI can still pin the number. */
-const coreVersion =
-  process.env.NEXT_PUBLIC_WICKD_CORE_VERSION ??
-  coreVersionFromCli() ??
-  CORE_FALLBACK;
+import { version as coreVersion } from "./core-version.json";
 
 const nextConfig: NextConfig = {
   env: {
-    /* Read here rather than in the component: importing package.json from client
-     * code ships the whole manifest — scripts, dependencies and their exact
-     * versions — to every visitor. This inlines just the string. */
+    /* Both read here rather than in a component: importing a manifest from client
+     * code ships the whole file — for package.json that means every script,
+     * dependency and exact version — to every visitor. This inlines just the
+     * two strings.
+     *
+     * Core ships from wickd-dotnet, so core-version.json is this repo's record of
+     * it, kept current by .github/workflows/core-version.yml. Deliberately not
+     * probed from `wickd --version` at build time: Wickd.CLI and Wickd.Core share
+     * one number under unified versioning, so the CLI adds nothing the committed
+     * file doesn't already say — and any machine with a different CLI installed
+     * would quietly build a different number than production. */
     NEXT_PUBLIC_WEB_VERSION: version,
-    NEXT_PUBLIC_WICKD_CORE_VERSION: coreVersion,
+    NEXT_PUBLIC_WICKD_CORE_VERSION:
+      process.env.NEXT_PUBLIC_WICKD_CORE_VERSION ?? coreVersion,
   },
 };
 
