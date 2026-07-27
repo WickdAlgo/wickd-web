@@ -1,0 +1,67 @@
+name: Sync Core version
+
+# Records the Wickd.Core version in core-version.json so the site can display it.
+# Core ships from wickd-dotnet, which fires the repository_dispatch below on release.
+#
+# The push is what deploys: Workers Builds is still the only deploy path, and it
+# picks this commit up like any other. That means the token must be a PAT, not the
+# default GITHUB_TOKEN — pushes made with GITHUB_TOKEN deliberately do not trigger
+# downstream workflows, so `verify` would never run on the bump.
+#
+# Manual runs are for correcting a bad sync without waiting on a Core release.
+
+on:
+  repository_dispatch:
+    types: [core-released]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Core version, without a leading v (e.g. 0.7.1)"
+        required: true
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.CORE_VERSION_SYNC_TOKEN }}
+
+      - name: Resolve and validate the incoming version
+        id: v
+        env:
+          RAW: ${{ github.event.client_payload.version || inputs.version }}
+        run: |
+          set -euo pipefail
+          version="${RAW#v}"
+          # Refuse anything that isn't a semver: this value is written straight
+          # into the page, and a malformed dispatch payload should fail loudly
+          # rather than ship "undefined" to visitors.
+          if ! printf '%s' "$version" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+([-+][0-9A-Za-z.]+)*$'; then
+            echo "::error::Not a semver: '${RAW}'"
+            exit 1
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Write core-version.json
+        env:
+          VERSION: ${{ steps.v.outputs.version }}
+        run: |
+          set -euo pipefail
+          jq --arg v "$VERSION" '.version = $v' core-version.json > core-version.tmp
+          mv core-version.tmp core-version.json
+
+      - name: Commit if it changed
+        env:
+          VERSION: ${{ steps.v.outputs.version }}
+        run: |
+          set -euo pipefail
+          if git diff --quiet core-version.json; then
+            echo "Already at $VERSION — nothing to do."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add core-version.json
+          git commit -m "chore: sync Wickd.Core version to $VERSION"
+          git push
