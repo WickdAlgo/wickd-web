@@ -4,7 +4,8 @@
   "private": true,
   "packageManager": "pnpm@11.12.0",
   "scripts": {
-    "build": "next build",
+    "build": "opennextjs-cloudflare build",
+    "build:next": "next build",
     "dev": "next dev",
     "start": "next start",
     "lint": "eslint",
