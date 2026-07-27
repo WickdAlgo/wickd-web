@@ -7,7 +7,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 Package manager is **pnpm** (pnpm-workspace.yaml at root).
 
 - `pnpm dev` — start the Next.js dev server (http://localhost:3000)
-- `pnpm build` — production build
+- `pnpm build` — production build of the deployable Worker (`next build` + the OpenNext bundle in `.open-next/`)
+- `pnpm build:next` — the plain `next build`; invoked by `pnpm build` via `buildCommand` in `open-next.config.ts`
 - `pnpm start` — serve the production build
 - `pnpm lint` — run ESLint (flat config, `eslint.config.mjs`, next/core-web-vitals + TypeScript)
 
@@ -17,6 +18,8 @@ Deployed to Cloudflare Workers via `@opennextjs/cloudflare` (`wrangler.jsonc`, `
 
 - `pnpm preview` — build and serve the Worker locally via Wrangler
 - `pnpm deploy` — build and deploy to Cloudflare Workers
+
+Deploys actually run through **Workers Builds**, whose commands are `pnpm run build` then `npx wrangler deploy`. `wrangler deploy` delegates to `opennextjs-cloudflare deploy`, which only deploys — it never builds — so `pnpm build` has to emit `.open-next/` or the deploy fails with "Could not find compiled Open Next config". That is why `build` is the OpenNext build and the Next build lives in `build:next`: `opennextjs-cloudflare build` shells out to the package manager's `build` script by default, which would recurse into itself. Don't point `build` back at `next build`.
 
 The site is fully static (no ISR, no `next/image`, no API routes), so the config intentionally omits the R2 incremental-cache and Images bindings the adapter's `migrate` scaffolder adds by default — add them back only if the app gains dynamic rendering or image optimization. The `WORKER_SELF_REFERENCE` service binding in `wrangler.jsonc` is **not** just for R2 caching, though — removing it breaks `/` with a Cloudflare 1042 error (OpenNext's bundled server does an internal self-fetch even on a static site). Keep it.
 
