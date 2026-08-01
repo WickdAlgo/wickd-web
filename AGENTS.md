@@ -120,10 +120,13 @@ pnpm preview
   in `.open-next/`. The plain Next build is `pnpm build:next`.
 - `preview` builds and serves the Worker locally through Wrangler.
 
-There is no test suite. `.github/workflows/ci.yml` runs `pnpm lint`,
-`pnpm build`, and the design-system validator on every push to `main` and every
-pull request. Validation for UI work is the preview plus the checks named in
-the sprint item.
+- `test` runs the Vitest unit and component suite once; `test:watch` keeps it
+  open.
+- `test:e2e` runs the Playwright workflow spec against `pnpm start`.
+
+`.github/workflows/ci.yml` runs `pnpm lint`, `pnpm test`, `pnpm build`, the
+design-system validator, and `pnpm test:e2e` on every push to `main` and every
+pull request.
 
 ## Coding Style & Naming Conventions
 
@@ -141,18 +144,28 @@ non-obvious layout, motion, deployment, or design-system decisions.
 
 ## Testing Guidelines
 
-There is no automated test suite. Prove UI work instead:
-
 ```text
 pnpm lint
+pnpm test
 pnpm build
 bash .claude/skills/add-ui-component/scripts/validate.sh
+pnpm test:e2e
 ```
 
-Run `pnpm dev` or `pnpm preview` and check the affected routes at desktop and
-mobile widths, including reduced-motion behavior for animated work. Record what
-was checked in the sprint work log; screenshots belong in the pull request for
-visual changes.
+Unit and component tests are colocated as `src/**/*.test.{ts,tsx}` and run in
+jsdom. They cover the logic that can be wrong without looking wrong — causal
+filtering, contract parsing and version rejection, chart geometry — plus the
+interactive library components.
+
+The chart is never mounted in Vitest: jsdom returns `null` from `getContext`.
+Chart geometry is asserted by rendering the overlay against a hand-built
+projection, which is why `Projection` is an interface. Proving the chart
+actually paints is the Playwright spec's job, and only its job.
+
+Automated tests do not replace looking at the result. Run `pnpm dev` or
+`pnpm preview` and check the affected routes at desktop and mobile widths,
+including reduced-motion behavior for animated work. Record what was checked in
+the sprint work log; screenshots belong in the pull request for visual changes.
 
 ## Commit & Pull Request Guidelines
 

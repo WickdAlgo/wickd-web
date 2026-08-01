@@ -21,6 +21,12 @@ const eslintConfig = defineConfig([
     // node_modules, and ESLint walks straight into them: linting the repo
     // reported thousands of problems from code that isn't ours.
     ".claude/worktrees/**",
+
+    // Test output. Flat config does not read .gitignore, and `pnpm lint` runs
+    // ESLint over the working directory.
+    "playwright-report/**",
+    "test-results/**",
+    "coverage/**",
   ]),
 ]);
 

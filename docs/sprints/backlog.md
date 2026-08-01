@@ -89,6 +89,12 @@ an unclaimed candidate is not a commitment.
     verify coverage rather than adding a second mechanism.
   - Record findings as new backlog items rather than fixing everything in one
     sprint.
+  - **First finding, from Sprint 2's component tests:** `Field` wraps the
+    label, the control, and the hint in one `<label>`, so a control's
+    accessible name is the label and the hint concatenated — "Run ID Writes
+    runs/{runId}/structures.jsonl". The hint wants `aria-describedby` instead.
+    `src/components/ui/interactive.test.tsx` documents the current behavior, so
+    fixing it will fail that test loudly rather than silently.
 - **Validation:** Keyboard walkthrough of `/`, `/engine`, `/pricing`,
   `/design`, and `/platform`, plus a reduced-motion run.
 

@@ -56,9 +56,11 @@ and carryover.
 
 ## Proving Web Work
 
-There is no test suite, so evidence is explicit. A completed item names:
+A green suite is necessary and not sufficient: it says the logic holds, not that
+the page reads well. Evidence stays explicit. A completed item names:
 
-- the commands run (`pnpm lint`, `pnpm build`, the design-system validator),
+- the commands run (`pnpm lint`, `pnpm test`, `pnpm build`, the design-system
+  validator, `pnpm test:e2e`),
 - the routes checked and at which widths,
 - reduced-motion behavior for anything animated,
 - and, for visual changes, the before/after screenshots attached to the pull
