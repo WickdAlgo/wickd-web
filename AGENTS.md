@@ -9,6 +9,7 @@ Each source has one role:
 | What is shipped and how do I run it? | `README.md` |
 | What is the web surface for and what governs it? | `PRODUCT.md` |
 | How should it look and behave? | `DESIGN.md` |
+| Why is the architecture shaped this way? | `docs/architecture/` |
 | What work is planned or committed? | `docs/sprints/` |
 | What does a version include and require? | `docs/releases/` |
 | How does a version reach production? | `docs/releases/README.md` |
@@ -67,14 +68,27 @@ Workflow rules:
   the deploy runbook.
 - `src/app/(site)/` contains the marketing routes (home, engine, pricing,
   design) sharing the `SiteNav` + `Footer` shell from `(site)/layout.tsx`.
-- `src/app/platform/` is the platform shell: one client page whose sidebar
-  switches between views in React state. There are no nested platform routes.
+- `src/app/platform/` is the platform surface: nested routes sharing a layout,
+  with the sidebar deriving its active state from the URL.
 - `src/components/ui/` is the WickdAlgo component library, re-exported through
   `src/components/ui/index.ts`. Import from `@/components/ui`.
 - `src/components/home/` and `src/components/platform/` contain
   page-specific composition that is deliberately not part of the library.
+- `src/contracts/` holds the versioned, runtime-validated payload schemas the
+  platform renders. They are provisional: `Wickd.Inspection` will become
+  canonical, so nothing outside this directory defines a structure shape.
+- `src/data/platform/` holds the `PlatformGateway` and its fixture
+  implementation. Views depend on the gateway, never on a fixture array.
+- `src/features/` holds domain-aware composition that is too specific for the
+  component library and too reusable for one route — currently the chart
+  renderer and causal replay.
 - `src/lib/` contains `cx.ts`, `styles.ts`, `use-controllable.ts`,
-  `use-reduced-motion.ts`, and `version.ts`.
+  `use-reduced-motion.ts`, `use-theme-epoch.ts`, and `version.ts`.
+
+Imports run one way: `app/` -> `features/` -> `data/` -> `contracts/`. A
+renderer receives typed data and emits callbacks; it never reaches for a
+gateway. `docs/architecture/001-platform-and-journal-boundaries.md` states why,
+and what this repository must never compute.
 - `src/app/globals.css` holds every design token. There is no
   `tailwind.config` file.
 - `core-version.json` records the Wickd.Core version for display only. It is

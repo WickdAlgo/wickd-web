@@ -36,6 +36,7 @@ There is no test suite. CI runs `pnpm lint`, `pnpm build`, and
 | [AGENTS.md](AGENTS.md) | Repository contract for agents and contributors |
 | [CHANGELOG.md](CHANGELOG.md) | Shipped release history |
 | [docs/development-cycle.md](docs/development-cycle.md) | The full idea-to-deploy loop |
+| [docs/architecture/](docs/architecture/) | Decision records — why the platform is shaped this way |
 | [docs/sprints/](docs/sprints/) | Backlog, sprint commitments, work logs |
 | [docs/releases/](docs/releases/) | Release contracts, versioning, deploy runbook |
 
