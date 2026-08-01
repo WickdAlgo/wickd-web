@@ -32,8 +32,9 @@ history prior to the first entry below is in git.
 
 ### Changed
 
-- `design`: every surface is built on design tokens; hardcoded hex values were
-  removed from pages, the UI kit, and the animated logo.
+- `design`: pages, the UI kit, and the animated logo were migrated onto design
+  tokens. The migration is not complete — hex literals remain in the hero
+  background, the platform view code blocks, and the favicon (`WEB-BL-006`).
 - `ui`: redesigned nav bar and footer chrome.
 
 ### Fixed

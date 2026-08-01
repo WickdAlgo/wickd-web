@@ -104,6 +104,30 @@ an unclaimed candidate is not a commitment.
 - **Validation:** Keyboard walkthrough of `/`, `/engine`, `/pricing`,
   `/design`, and `/platform`, plus a reduced-motion run.
 
+### WEB-BL-006: Finish The Design-Token Migration
+
+- **State:** Candidate
+- **Area:** `src/components/home/hero-background.tsx`,
+  `src/components/platform/`, `src/app/icon.svg`
+- **User value:** `DESIGN.md` forbids hex literals so color keeps its meaning
+  and themes stay changeable in one place. The migration covered the pages, the
+  UI kit, and the animated logo, but not everything.
+- **Release target:** `docs/releases/v0.1.0.md`
+- **Acceptance:** No hex color literal outside `src/app/globals.css`, and the
+  rule is enforced rather than remembered.
+- **Technical constraints:**
+  - `hero-background.tsx` holds 15 literals in its block table plus the grid
+    gradient — these are decorative colors with no current token, so the fix is
+    partly a token decision, not a find-and-replace.
+  - `inspect-view.tsx` and `backtest-view.tsx` use `text-[#d7e0e2]` for code
+    blocks on the inverse surface; that wants a semantic token.
+  - `src/app/icon.svg` carries the brand palette. Decide whether the favicon is
+    exempt — it renders outside the page and cannot read CSS variables.
+  - Add the check to `.claude/skills/add-ui-component/scripts/validate.sh` so
+    it cannot regress.
+- **Validation:** `grep -rE '#[0-9a-fA-F]{3,8}' src --include='*.tsx'` returns
+  nothing, and the validator fails when a literal is reintroduced.
+
 ## Ready
 
 _None yet. Groom a candidate before committing it to a sprint._

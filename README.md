@@ -22,7 +22,7 @@ Open [http://localhost:3000](http://localhost:3000).
 | `pnpm start`       | Serve the production build                             |
 | `pnpm lint`        | Run ESLint                                             |
 | `pnpm preview`     | Build and serve the Worker locally via Wrangler        |
-| `pnpm deploy`      | Build and deploy to Cloudflare Workers                 |
+| `pnpm deploy`      | Deploy straight to production from a local machine — incident escape hatch, not a release path ([why](docs/releases/README.md#manual-deploys)) |
 
 There is no test suite. CI runs `pnpm lint`, `pnpm build`, and
 `bash .claude/skills/add-ui-component/scripts/validate.sh`.

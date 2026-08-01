@@ -46,9 +46,17 @@ abandoned contract. Record scope changes after commitment in the lifecycle log.
   `X.Y.Z-preview.N`.
 - The source currently declares `0.1.0-preview`.
 - `next.config.ts` inlines the version as `NEXT_PUBLIC_WEB_VERSION`, and
-  `src/lib/version.ts` exposes it as `WEB_VERSION` in the nav bar, mobile
-  drawer, and platform sidebar. Bumping `package.json` is what changes the
-  number visitors see.
+  `src/lib/version.ts` exposes it as `WEB_VERSION`. Bumping `package.json` is
+  what changes the number visitors see.
+- Where the markers actually render:
+  - **Marketing footer** (`src/app/(site)/layout.tsx` -> `Footer` ->
+    `VersionList`) — both `web` and `core`. This is the only place the Core
+    version appears.
+  - **Platform sidebar** (`src/app/platform/page.tsx`) — the `web` version
+    only, as a mono `Tag` at the bottom of the rail.
+
+  Neither marker appears in the nav bar or the mobile drawer. Verify a bump in
+  the footer and the platform sidebar; the nav will not change.
 - Version changes occur in release-prep pull requests.
 
 ### Core version is not the site version
@@ -80,8 +88,23 @@ then `npx wrangler deploy`.
 ```sh
 pnpm build     # next build + the OpenNext bundle in .open-next/
 pnpm preview   # build and serve the Worker locally through Wrangler
-pnpm deploy    # build and deploy directly (bypasses Workers Builds)
 ```
+
+### Manual deploys
+
+`pnpm deploy` builds and pushes straight to the production Worker from a local
+machine. It is a real second path to production, and it bypasses review, CI,
+the changelog, and the deployment record — a manual deploy can put code live
+that is on no `main` commit at all, after which the repository and production
+silently disagree.
+
+Do not use it to release. It exists for an incident where Workers Builds itself
+is unavailable and the site must be fixed now. If it is used:
+
+1. Land the same change on `main` as soon as the incident allows, so the next
+   Workers Builds deploy is not a regression.
+2. Record the manual deploy — what, why, and by whom — in the sprint work log
+   and in the affected contract's deployment record.
 
 Load-bearing configuration — change with care:
 

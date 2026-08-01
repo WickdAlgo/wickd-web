@@ -46,8 +46,13 @@ Workflow rules:
   requests identify sprint/backlog, validation, changelog, release,
   deployment, configuration, risk, and follow-up impact.
 - Merge reviewed work to `main` after required checks pass.
-- Merging to `main` deploys. Cloudflare Workers Builds is the only deploy path
-  and it runs on every `main` commit, so `main` is always production.
+- Merging to `main` deploys. Cloudflare Workers Builds runs on every `main`
+  commit, so a merge is a production release.
+- Workers Builds is the only *sanctioned* deploy path. `pnpm deploy` also
+  pushes straight to the production Worker from a local machine, bypassing
+  review, CI, and the deployment record — treat it as an incident escape
+  hatch, not a release mechanism, and record any use in the sprint work log.
+  `docs/releases/README.md` governs it.
 - A version ships as a deployment record, not a tag: release-prep work
   finalizes the changelog section, sets `version` in `package.json`, satisfies
   the contract launch gate, and the contract flips to `Shipped` once the deploy
