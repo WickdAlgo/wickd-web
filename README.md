@@ -49,13 +49,21 @@ WickdAlgo's product-wide vision lives in
 src/
   app/
     (site)/          Marketing pages (home, engine, pricing, design) with shared nav/footer
-    platform/        Platform app shell (datasets, inspect, backtest views)
+    platform/        Platform routes (inspect, journal, backtest, datasets, playground)
     icon.svg         Favicon — static candlestick W mark
   components/
     ui/              WickdAlgo component library (imported from the design system)
     home/            Home-page sections (hero background, pipeline)
     platform/        Platform views
+  contracts/         Versioned, runtime-validated payload schemas
+  data/platform/     PlatformGateway and its fixture implementation
+  features/
+    chart/           Lightweight Charts renderer and structure overlays
+    replay/          Causal no-lookahead filtering
 ```
+
+Imports run one way: `app/` → `features/` → `data/` → `contracts/`. See
+[docs/architecture/001-platform-and-journal-boundaries.md](docs/architecture/001-platform-and-journal-boundaries.md).
 
 ## Brand
 
@@ -64,3 +72,11 @@ The candlestick "W" mark lives in the org brand repo
 `src/components/ui/animated-logo.tsx` — an inline SVG with a CSS-only
 "market replay" hover animation, in a `full` (17-candle) and a `compact`
 (7-candle, small-size legible) variant.
+
+## Third-party notices
+
+The platform chart is built on
+[TradingView Lightweight Charts](https://github.com/tradingview/lightweight-charts),
+licensed under Apache-2.0. The library's on-chart attribution logo is disabled
+in `src/features/chart/use-lightweight-chart.ts` — permitted by the licence —
+so this notice carries the attribution instead.

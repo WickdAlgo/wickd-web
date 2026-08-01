@@ -1,7 +1,6 @@
 "use client";
 import React from "react";
 import {
-  CandleChart,
   Select,
   StatCard,
   StructureEventRow,
@@ -10,14 +9,22 @@ import {
   Tag,
   type TagTone,
 } from "@/components/ui";
-import type { DatasetSummary, StructureEventItem } from "@/contracts";
+import type { ChartCandle, DatasetSummary, StructureEventItem } from "@/contracts";
+import {
+  focusRangeForPrimitives,
+  StructureChartLazy,
+  type ChartLayerInput,
+} from "@/features/chart";
 import { panel } from "@/lib/styles";
 
 export interface InspectViewProps {
   datasets: readonly DatasetSummary[];
   events: readonly StructureEventItem[];
+  candles: readonly ChartCandle[];
+  layers: readonly ChartLayerInput[];
   runId: string;
   datasetAlias: string;
+  market: string;
   timeframe: string;
   candleCount: number;
   structureCount: number;
@@ -58,8 +65,11 @@ function clockTime(iso: string): string {
 export function InspectView({
   datasets,
   events,
+  candles,
+  layers,
   runId,
   datasetAlias,
+  market,
   timeframe,
   candleCount,
   structureCount,
@@ -68,11 +78,54 @@ export function InspectView({
   sweepCount,
   failedSweepCount,
 }: InspectViewProps) {
-  const [ov, setOv] = React.useState({ ob: true, fvg: true, liq: true, swing: true });
-  const [sel, setSel] = React.useState(0);
+  const [hidden, setHidden] = React.useState<readonly string[]>([]);
+  const [selectedEntityId, setSelectedEntityId] = React.useState<string | null>(null);
   const [tab, setTab] = React.useState("Structures");
 
-  const selected = events[sel];
+  const visibleLayerIds = React.useMemo(
+    () => layers.filter((l) => !hidden.includes(l.id)).map((l) => l.id),
+    [layers, hidden],
+  );
+
+  const toggleLayer = (id: string, on: boolean) =>
+    setHidden((h) => (on ? h.filter((x) => x !== id) : [...h, id]));
+
+  /**
+   * The chart and the list select the same thing.
+   *
+   * Primitives carry an `entityId`, so selecting a shape and selecting a row
+   * resolve to one identity — clicking a zone highlights its row, and clicking
+   * a row highlights its zone.
+   */
+  const selectedPrimitiveId = React.useMemo(() => {
+    if (!selectedEntityId) return null;
+    for (const layer of layers) {
+      const hit = layer.primitives.find((p) => p.entityId === selectedEntityId);
+      if (hit) return hit.id;
+    }
+    return null;
+  }, [layers, selectedEntityId]);
+
+  const selectPrimitive = (primitiveId: string | null) => {
+    if (primitiveId === null) return setSelectedEntityId(null);
+    for (const layer of layers) {
+      const hit = layer.primitives.find((p) => p.id === primitiveId);
+      if (hit?.entityId) {
+        setSelectedEntityId(hit.entityId);
+        setTab("Detail");
+        return;
+      }
+    }
+  };
+
+  const selected = events.find((e) => e.entityId === selectedEntityId) ?? events[0];
+
+  // Open on the structures rather than the whole session, so a five-minute
+  // order block is large enough to see and to click.
+  const focus = React.useMemo(
+    () => focusRangeForPrimitives(layers.flatMap((l) => l.primitives), candles),
+    [layers, candles],
+  );
 
   return (
     <div className="grid grid-cols-1 items-start gap-4 xl:grid-cols-[1fr_340px]">
@@ -98,12 +151,16 @@ export function InspectView({
             <Tag mono>run: {runId}</Tag>
           </div>
         </div>
-        <CandleChart
+        <StructureChartLazy
+          candles={candles}
+          layers={layers}
+          visibleLayerIds={visibleLayerIds}
+          selectedId={selectedPrimitiveId}
+          onSelect={selectPrimitive}
+          market={market}
+          timeframe={timeframe}
+          focus={focus}
           height={330}
-          showOB={ov.ob}
-          showFVG={ov.fvg}
-          showLiquidity={ov.liq}
-          showSwing={ov.swing}
         />
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
           <StatCard label="Candles replayed" value={candleCount.toLocaleString()} />
@@ -127,11 +184,17 @@ export function InspectView({
           <div className="font-ui mb-3 text-[10px] font-medium uppercase tracking-[1px] text-ink-secondary">
             Overlays
           </div>
+          {/* Driven by the contract's layers, not a hardcoded list — a new
+              layer in the dataset gets a toggle without a code change. */}
           <div className="flex flex-col gap-2.5">
-            <Switch label="Order blocks" checked={ov.ob} onChange={(v) => setOv({ ...ov, ob: v })} />
-            <Switch label="Fair value gaps" checked={ov.fvg} onChange={(v) => setOv({ ...ov, fvg: v })} />
-            <Switch label="Liquidity" checked={ov.liq} onChange={(v) => setOv({ ...ov, liq: v })} />
-            <Switch label="Swing legs" checked={ov.swing} onChange={(v) => setOv({ ...ov, swing: v })} />
+            {layers.map((layer) => (
+              <Switch
+                key={layer.id}
+                label={layer.label}
+                checked={!hidden.includes(layer.id)}
+                onChange={(v) => toggleLayer(layer.id, v)}
+              />
+            ))}
           </div>
         </div>
         <div className={`${panel} overflow-hidden`}>
@@ -140,16 +203,16 @@ export function InspectView({
           </div>
           {tab === "Structures" ? (
             <div>
-              {events.map((e, i) => (
+              {events.map((e) => (
                 <StructureEventRow
                   key={e.id}
                   time={clockTime(e.timeUtc)}
                   kind={familyTone[e.family]}
                   label={e.label}
                   detail={e.detail}
-                  selected={sel === i}
+                  selected={selectedEntityId === e.entityId}
                   onInspect={() => {
-                    setSel(i);
+                    setSelectedEntityId(e.entityId);
                     setTab("Detail");
                   }}
                 />

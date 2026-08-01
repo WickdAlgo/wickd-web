@@ -159,6 +159,11 @@
   --structure-default: var(--color-line-gray);
   --structure-internal-alpha: 0.45;
   --structure-external-alpha: 0.95;
+  /* Zone fills on the platform chart. The structure alphas above are tuned for
+     a block on a page, where nothing shows through; a zone drawn over candles
+     has to let the price action read, so it gets its own pair. */
+  --chart-zone-alpha-internal: 0.16;
+  --chart-zone-alpha-external: 0.3;
   /* Chart canvas & candles */
   --chart-canvas: var(--color-chart-cream);
   --chart-up-body: var(--color-paper);

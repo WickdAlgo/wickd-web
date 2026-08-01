@@ -34,8 +34,11 @@ export default async function InspectPage() {
       <InspectView
         datasets={datasets}
         events={events}
+        candles={dataset.candles}
+        layers={dataset.layers}
         runId={dataset.run.runId}
         datasetAlias={dataset.run.datasetAlias}
+        market={dataset.run.instrument.market}
         timeframe={dataset.run.instrument.timeframe}
         candleCount={dataset.candles.length}
         structureCount={dataset.entities.length + dataset.lifecycle.length}
