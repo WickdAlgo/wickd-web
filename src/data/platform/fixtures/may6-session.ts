@@ -112,12 +112,23 @@ const I_FVG = (() => {
   return best;
 })();
 
-/** The order block: the last down candle before that displacement. */
+/**
+ * The order block: the last down candle immediately before that displacement.
+ *
+ * The search window is bounded. An unbounded walk backwards found the last down
+ * candle *anywhere* earlier in the session, which during a sustained rally
+ * meant a "block" thousands of points below the gap it supposedly caused — and
+ * a trade drawn on it had its stop above its entry.
+ */
+const OB_LOOKBACK = 8;
 const I_OB = (() => {
-  for (let i = I_FVG - 1; i >= 1; i -= 1) {
+  const floor = Math.max(1, I_FVG - OB_LOOKBACK);
+  for (let i = I_FVG - 1; i >= floor; i -= 1) {
     if (isDown(i)) return i;
   }
-  throw new Error("no down candle before the displacement");
+  // No down candle in the window: use the candle immediately before the gap,
+  // which is still the origin of the move even if it closed up.
+  return Math.max(1, I_FVG - 1);
 })();
 
 const I_OB_CONFIRMED = I_FVG;

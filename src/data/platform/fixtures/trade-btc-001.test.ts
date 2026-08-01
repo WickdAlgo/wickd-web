@@ -89,6 +89,50 @@ describe("trade-btc-001 fixture", () => {
     for (const p of prices) expect(p).toBeGreaterThan(entryFill);
   });
 
+  /**
+   * A long's levels have to sit in the right order. The first version of this
+   * fixture put the stop *above* the entry and the third target 18,000 points
+   * above any price the session reached — because the entry fill was taken from
+   * whatever printed a few candles after the signal rather than from the block
+   * the plan names.
+   */
+  describe("plan geometry is coherent for a long", () => {
+    const entryFill = Number(t.fills.find((f) => f.role === "entry")!.price);
+    const entry = t.levels.find((l) => l.role === "entry")!;
+    const initialStop = Number(t.levels.find((l) => l.id === "lvl-stop-0")!.price);
+
+    it("fills inside the entry zone", () => {
+      expect(entryFill).toBeGreaterThanOrEqual(Number(entry.zoneLow));
+      expect(entryFill).toBeLessThanOrEqual(Number(entry.zoneHigh));
+    });
+
+    it("puts the initial stop below the entry zone", () => {
+      expect(initialStop).toBeLessThan(Number(entry.zoneLow));
+    });
+
+    it("puts the breakeven stop above the initial stop and at the fill", () => {
+      const moved = Number(t.levels.find((l) => l.id === "lvl-stop-1")!.price);
+      expect(moved).toBeGreaterThan(initialStop);
+      expect(moved).toBe(entryFill);
+    });
+
+    it("keeps every target within the range the session actually traded", () => {
+      const sessionHigh = Math.max(...may6Session.candles.map((c) => c.high));
+      for (const target of t.levels.filter((l) => l.role === "target")) {
+        expect(Number(target.price)).toBeLessThanOrEqual(sessionHigh);
+      }
+    });
+
+    it("keeps every fill price within the session's range", () => {
+      const lo = Math.min(...may6Session.candles.map((c) => c.low));
+      const hi = Math.max(...may6Session.candles.map((c) => c.high));
+      for (const f of t.fills) {
+        expect(Number(f.price)).toBeGreaterThanOrEqual(lo);
+        expect(Number(f.price)).toBeLessThanOrEqual(hi);
+      }
+    });
+  });
+
   it("reports a different R from the one the account saw", () => {
     // The gap is the point. A fixture where these agree makes the comparison
     // look decorative rather than diagnostic.

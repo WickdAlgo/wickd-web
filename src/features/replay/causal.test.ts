@@ -305,14 +305,40 @@ describe("sliceTradeAsOf", () => {
     expect(before.signals.length).toBeLessThan(after.signals.length);
   });
 
-  it("withholds the outcome until the execution has opened", () => {
-    // netR lives on the execution record, so hiding it before the trade opens
-    // also hides the answer the reviewer is supposed to be working toward.
+  it("hides the execution entirely until it opens", () => {
     const beforeOpen = sliceTradeAsOf(tradeBtc001, tradeBtc001.idea.signalTimeUtc);
     expect(beforeOpen.execution).toBeNull();
 
     const atEnd = sliceTradeAsOf(tradeBtc001, null);
     expect(atEnd.execution?.netR).toBe("2.41");
+  });
+
+  it("shows an open execution but withholds its result until it closes", () => {
+    // Visibility has two stages. The reviewer needs to see that a position
+    // exists — size, risk — while replaying. They must not see how it ended.
+    // Collapsing the two showed "net R 2.41" during the entry, handing over the
+    // answer before the decision had been judged.
+    const opened = Date.parse(tradeBtc001.execution!.openedAtUtc!);
+    const closed = Date.parse(tradeBtc001.execution!.closedAtUtc!);
+    const midTrade = sliceTradeAsOf(tradeBtc001, (opened + closed) / 2);
+
+    expect(midTrade.execution).not.toBeNull();
+    expect(midTrade.execution!.status).toBe("open");
+    expect(midTrade.execution!.plannedRiskPct).toBe("0.75");
+
+    expect(midTrade.execution!.netR).toBeUndefined();
+    expect(midTrade.execution!.grossR).toBeUndefined();
+    expect(midTrade.execution!.netPnl).toBeUndefined();
+    expect(midTrade.execution!.grossPnl).toBeUndefined();
+    // The reported figure is an outcome too, and leaks just as much.
+    expect(midTrade.execution!.mentorReportedR).toBeUndefined();
+    expect(midTrade.execution!.closedAtUtc).toBeUndefined();
+  });
+
+  it("reveals the result at the moment the execution closes", () => {
+    const closed = Date.parse(tradeBtc001.execution!.closedAtUtc!);
+    expect(sliceTradeAsOf(tradeBtc001, closed - 1).execution!.netR).toBeUndefined();
+    expect(sliceTradeAsOf(tradeBtc001, closed).execution!.netR).toBe("2.41");
   });
 
   it("withholds the review until it was written", () => {

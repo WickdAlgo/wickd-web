@@ -297,6 +297,12 @@ export function sliceTradeAsOf(
     trade.execution !== null &&
     (openedAt === undefined || epochMs(openedAt) <= cursor.atUtcMs);
 
+  const closedAt = trade.execution?.closedAtUtc;
+  const outcomeKnown =
+    trade.execution !== null &&
+    closedAt !== undefined &&
+    epochMs(closedAt) <= cursor.atUtcMs;
+
   const reviewVisible =
     trade.review !== null && epochMs(trade.review.writtenAtUtc) <= cursor.atUtcMs;
 
@@ -306,10 +312,36 @@ export function sliceTradeAsOf(
     signals,
     levels: filterLevelsAsOf(trade.levels, cursor),
     fills: filterFillsAsOf(trade.fills, visibleSignalIds, cursor),
-    // The outcome fields — netR, netPnl — are part of the execution record, so
-    // hiding it before it opens also hides the result. Showing a closed trade's
-    // R while replaying its entry would give away the answer being reviewed.
-    execution: executionVisible ? trade.execution : null,
+    execution:
+      executionVisible && trade.execution
+        ? outcomeKnown
+          ? trade.execution
+          : redactOutcome(trade.execution)
+        : null,
     review: reviewVisible ? trade.review : null,
+  };
+}
+
+/**
+ * An open execution, with its result withheld.
+ *
+ * Visibility here has two stages, not one. An execution becomes visible when it
+ * *opens* — the reviewer needs to see that a position exists, at what size and
+ * risk. Its result only becomes visible when it *closes*.
+ *
+ * Collapsing the two leaks the answer: replaying the entry while "net R 2.41"
+ * sits on screen tells the reviewer how it turned out before they have judged
+ * the decision, which is precisely the hindsight this replay exists to remove.
+ */
+function redactOutcome(execution: NonNullable<TradeDetailV1["execution"]>) {
+  return {
+    ...execution,
+    status: "open" as const,
+    closedAtUtc: undefined,
+    mentorReportedR: undefined,
+    grossPnl: undefined,
+    netPnl: undefined,
+    grossR: undefined,
+    netR: undefined,
   };
 }

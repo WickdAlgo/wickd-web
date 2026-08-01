@@ -120,13 +120,30 @@ describe("may6-session fixture", () => {
       expect(fvg.subjectPriceHigh!).toBeGreaterThan(fvg.subjectPriceLow!);
     });
 
-    it("puts the order block on a real down candle before the displacement", () => {
+    it("puts the order block immediately before the displacement it caused", () => {
+      // Proximity is the property that matters, and the one whose absence
+      // caused real damage: an unbounded search found the last down candle
+      // anywhere earlier in the session, producing a block thousands of points
+      // below its own gap — and a trade drawn on it had its stop above its
+      // entry. Being a down candle is preferred but the data cannot always
+      // supply one during a sustained rally.
       const ob = d.entities.find((e) => e.id === "ob-018")!;
       const fvg = d.entities.find((e) => e.id === "fvg-042")!;
-      const obCandle = candleAt(ob.subjectTimeUtc);
+      const obIndex = d.candles.findIndex((c) => c.openTimeUtc === ob.subjectTimeUtc);
+      const fvgIndex = d.candles.findIndex((c) => c.openTimeUtc === fvg.subjectTimeUtc);
 
-      expect(obCandle.close).toBeLessThan(obCandle.open);
-      expect(Date.parse(ob.subjectTimeUtc)).toBeLessThan(Date.parse(fvg.subjectTimeUtc));
+      expect(obIndex).toBeLessThan(fvgIndex);
+      expect(fvgIndex - obIndex).toBeLessThanOrEqual(8);
+    });
+
+    it("keeps the order block within touching distance of its gap", () => {
+      const ob = d.entities.find((e) => e.id === "ob-018")!;
+      const fvg = d.entities.find((e) => e.id === "fvg-042")!;
+      const gapSize = fvg.subjectPriceHigh! - fvg.subjectPriceLow!;
+      // A block more than a few gap-widths away is not the origin of the move,
+      // whatever the index arithmetic says.
+      const distance = Math.abs(fvg.subjectPriceLow! - ob.subjectPriceHigh!);
+      expect(distance).toBeLessThan(Math.max(gapSize * 40, 1_000));
     });
 
     it("puts the swing high at the actual high of the analysed window", () => {

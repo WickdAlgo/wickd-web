@@ -47,9 +47,22 @@ const I_EXIT = step(40);
 
 const entryLow = marks.orderBlockLow;
 const entryHigh = marks.orderBlockHigh;
-const entryFillPrice = candles[I_ENTRY].close;
-const initialStop = entryLow - 140;
+
+/**
+ * Filled inside the block, which is what the plan says to do.
+ *
+ * Using whatever price happened to print a few candles later put the fill far
+ * above the zone during a fast move, which then placed the breakeven stop above
+ * the entry and pushed the targets thousands of points beyond any price the
+ * session reached.
+ */
+const entryFillPrice = round2((entryLow + entryHigh) / 2);
+const initialStop = round2(entryLow - (entryHigh - entryLow) - 60);
 const risk = entryFillPrice - initialStop;
+
+function round2(n: number): number {
+  return Math.round(n * 100) / 100;
+}
 
 const raw = {
   schemaVersion: 1,

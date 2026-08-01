@@ -23,3 +23,4 @@ export {
 } from "./projection";
 export { readChartTheme, type ChartTheme } from "./chart-theme";
 export { focusRangeForPrimitives } from "./focus-range";
+export { tradeLayers, type TradeLayersInput } from "./trade-layers";
