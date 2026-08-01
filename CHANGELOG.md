@@ -22,10 +22,12 @@ history prior to the first entry below is in git.
   `src/components/ui/index.ts`.
 - `home`: animated pipeline section and hero structure background.
 - `ui`: inline animated candlestick "W" brand mark and SVG favicon.
-- `site`: Wickd.Core and web version markers in the site chrome, synced from
-  wickd-dotnet releases by `.github/workflows/core-version.yml`.
-- `ci`: lint, build, and design-system validation on every push and pull
-  request.
+- `site`: web and Wickd.Core version markers in the site chrome. The web marker
+  follows this repository's `package.json` version; the Core marker is synced
+  from wickd-dotnet releases by `.github/workflows/core-version.yml` and moves
+  independently of it.
+- `ci`: lint, build, and design-system validation on every push to `main` and
+  every pull request.
 - `docs`: the development cycle and document hierarchy — `PRODUCT.md`,
   `AGENTS.md`, `DESIGN.md`, `docs/sprints/`, `docs/releases/`, and the pull
   request template.

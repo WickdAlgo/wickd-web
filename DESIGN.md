@@ -77,7 +77,12 @@ Rules:
 
 ## Motion
 
-- Keyframes are prefixed `wa-` and live at the bottom of `globals.css`.
+- Keyframes are prefixed `wa-` and belong at the bottom of `globals.css`. The
+  exception is a component that ships its own `<style>` block to stay
+  self-contained — `animated-logo.tsx` defines `wa-replay-grow` alongside the
+  mark it animates, and keeps its reduced-motion fallback there too. Keep the
+  prefix either way; a keyframe used by more than one component belongs in
+  `globals.css`.
 - Every animation must degrade: the reduced-motion fallback is part of the
   change, not a follow-up. Component-level opt-out uses
   `src/lib/use-reduced-motion.ts`.

@@ -46,9 +46,11 @@ audiences the product cannot serve.
 - The site presents the product; it does not redefine market-structure
   semantics. Terminology follows the engine, never the other way round.
 - No claim ships ahead of the engine. Tiers that are not available say so.
-- The web surface is static and client-side: no backend, no API routes, no
-  accounts, no user data, no live market feed. Chart and journal content is
-  generated in the browser for illustration and must read as illustration.
+- The web surface is static: no backend, no API routes, no accounts, no user
+  data, no live market feed. Chart and journal content is generated from a
+  fixed seed — at build time or in the browser, depending on the route — and
+  must read as illustration. Nothing here is fetched, and nothing is real
+  market data.
 - The platform route is a shell demonstrating the intended workflow, not a
   running product. It must not imply that it is executing real analysis.
 - Nothing here is financial advice, a signal service, a broker, or a
