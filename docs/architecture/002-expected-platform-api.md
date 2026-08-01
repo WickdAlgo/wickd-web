@@ -143,3 +143,7 @@ Add authentication and ownership boundaries
 ```
 
 These are downstream of the current Core release and must not disturb it.
+
+**These items are not on wickd-dotnet's backlog yet.** This document is a
+specification looking for an owner; until an item over there references it,
+nothing acts on it. Tracked here as `WEB-BL-013`.

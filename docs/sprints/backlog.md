@@ -330,6 +330,137 @@ ownership split these items assume.
   enter causal mode, move the cursor before the stop update, and confirm the
   new stop and later fills disappear.
 
+## Candidate — real data and authoring
+
+These come from a scope addition to the original handoff: `wickd-web` is to be
+used for Wickd.Inspection visualization, backtesting through wickd-dotnet
+tools, journaling the maintainer's own trades with screenshots and notes, and
+journaling a mentor's trades with screenshots and notes.
+
+The first three are what that requires; `WEB-BL-016` is the decision the rest
+depend on.
+
+### WEB-BL-013: The Expected Backend Contract Is Not On wickd-dotnet's Backlog
+
+- **State:** Candidate
+- **Area:** `docs/architecture/002-expected-platform-api.md`, wickd-dotnet
+- **User value:** Sprint 2 wrote down the API this repository expects, so the
+  .NET side can be designed against a specification instead of a guess. That
+  document currently exists only here — no item on wickd-dotnet references it,
+  so nothing will act on it.
+- **Release target:** `Not release-relevant`
+- **Acceptance:** wickd-dotnet's backlog carries items derived from ADR 002,
+  and ADR 002 links to them.
+- **Technical constraints:**
+  - IDs are per-repository: wickd-dotnet numbers `WKD-BL-NNN` independently.
+  - The current Core release is structure-first and must not be disturbed; the
+    platform API is a downstream consumer.
+- **Validation:** The cross-reference resolves in both directions.
+
+### WEB-BL-014: The Mentor Diary Is Not Rendered
+
+- **State:** Candidate
+- **Area:** `src/contracts/`, `src/data/platform/`
+- **User value:** `wickd-data` already produces a validated, checksummed
+  snapshot of the mentor's diary — 99 records across 2026-01 to 2026-07 — and
+  none of it reaches the journal.
+- **Release target:** `docs/releases/v0.3.0.md` (not yet opened)
+- **Acceptance:** The journal lists mentor-reported trades from a pinned
+  snapshot, with provenance visible, and rejects a snapshot whose checksum does
+  not match its manifest.
+- **Technical constraints:**
+  - **This data cannot enter the public bundle.** `wickd-data`'s policy is to
+    keep third-party snapshots private, and the handoff's non-goals forbid
+    exposing mentor content publicly. Blocked on `WEB-BL-016`.
+  - **It does not fit `TradeDetailV1`.** The records carry no prices, levels,
+    fills, or intraday timestamps — only date, asset, direction, `outcome_rr`,
+    `risk_percent`, `record_class`, before/after screenshot references, and a
+    note. It is a results log and needs its own contract; the chart-based
+    trade-detail view has nothing to plot for it.
+  - Pin `snapshot_id` and verify `normalized_sha256` from the manifest, so two
+    builds of one commit cannot differ.
+  - `record_class` distinguishes `reported` (92), `spot` (5), and `cancelled`
+    (2). The last two are not trades and must not enter performance figures.
+  - Carry `quality_flags` through rather than dropping them — 8 records have
+    `risk_missing` and 8 have `zero_rr`, and a summary that silently averages
+    over those is wrong.
+  - Screenshots are hotlinked `snipboard.io` URLs. Rendering them hotlinks a
+    third party's images and breaks on link rot; mirroring them is a
+    redistribution decision.
+- **Validation:** Row counts per month match the manifest; a tampered snapshot
+  fails the build.
+
+### WEB-BL-015: The Journal Cannot Be Filtered By Month
+
+- **State:** Candidate
+- **Area:** `src/app/platform/journal/`
+- **User value:** The list is fine at one fixture trade and unusable at a
+  hundred. Months are how a trading diary is actually read.
+- **Release target:** `docs/releases/v0.3.0.md` (not yet opened)
+- **Acceptance:** The journal filters by month, the selection is addressable in
+  the URL, and records before 2026-01 never appear.
+- **Technical constraints:**
+  - The cutoff is a rule, not a data fact. Today's snapshot happens to start at
+    2026-01, so a filter written against the data would look correct while
+    enforcing nothing — a later snapshot including 2025 would leak it.
+  - Month buckets come from `canonical_month`, which the ingest tool already
+    reconciles against `source_month`; one record carries
+    `source_month_mismatch`. Do not recompute months from `trade_date`.
+  - Follow the existing URL-state pattern in `src/features/replay`.
+- **Validation:** A fixture row dated 2025-12 is absent from every view.
+
+### WEB-BL-016: The Platform Surface Has No Access Boundary
+
+- **State:** Candidate — **decide this before `WEB-BL-014` and `WEB-BL-017`**
+- **Area:** repository-wide, `wrangler.jsonc`, `PRODUCT.md`
+- **User value:** The platform is about to hold a third party's trade diary and
+  the maintainer's own trades, screenshots, and notes. It is currently a public
+  route on a public site, in a public repository that deploys on every merge.
+- **Release target:** `docs/releases/v0.3.0.md` (not yet opened)
+- **Acceptance:** Journal data is absent from the git repository and from the
+  public build, and `/platform` is reachable only by an authenticated
+  maintainer.
+- **Technical constraints:**
+  - Chosen direction: keep one repository and one deploy; the build reads
+    journal data from `wickd-data` (private) so nothing is committed here, and
+    Cloudflare Access gates `/platform`. The marketing surface stays public.
+  - Access must cover the route's JavaScript chunks, not only its HTML — a
+    gated page whose data chunk is public is not gated.
+  - `PRODUCT.md` currently describes one public surface. An access boundary is
+    a constitutional change and needs an Amendments entry.
+  - The public build must remain buildable with no `wickd-data` present, or CI
+    on a fork breaks.
+- **Validation:** A logged-out request to `/platform` and to its chunks is
+  refused; `git grep` finds no mentor or personal trade data.
+
+### WEB-BL-017: There Is No Way To Record A Trade
+
+- **State:** Candidate
+- **Area:** `src/app/platform/journal/`, persistence
+- **User value:** The maintainer's own trades — the reason for the journal —
+  can only be added today by writing a TypeScript fixture and redeploying.
+- **Release target:** `docs/releases/v0.3.0.md` (not yet opened)
+- **Acceptance:** A trade can be captured in the UI with levels, fills,
+  screenshots, and notes, and survives a deploy.
+- **Technical constraints:**
+  - **This needs an architectural decision, not just implementation.**
+    `docs/architecture/001-platform-and-journal-boundaries.md` states that this
+    repository owns no persistence and that route handlers must not become a
+    backend; `PRODUCT.md` says the same. A capture form requires storage, and
+    `Wickd.Platform.Api` does not exist.
+  - Two honest routes: wait for the .NET API, or amend ADR 001 to allow a
+    clearly-isolated store here (D1 for records, R2 for screenshots) behind the
+    `WEB-BL-016` access boundary. Record whichever is chosen and why.
+  - Whatever is chosen, the boundary that must not move is authoritative
+    calculation: capture may store what the user enters and must not derive R,
+    PnL, or risk. That constraint is what keeps the eventual migration honest.
+  - Screenshots should be stored, not hotlinked — the mentor data demonstrates
+    why.
+  - The `PlatformGateway` interface already isolates this; adding write methods
+    to it keeps every view unchanged when the backend moves.
+- **Validation:** A trade captured through the form renders in the journal and
+  in the trade-detail chart, and survives a redeploy.
+
 ## Blocked
 
 _None._
