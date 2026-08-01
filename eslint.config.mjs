@@ -15,6 +15,12 @@ const eslintConfig = defineConfig([
     ".open-next/**",
     ".wrangler/**",
     "cloudflare-env.d.ts",
+
+    // Local-only tooling artifacts. These do not exist in a fresh clone, so CI
+    // never saw them — but locally they are full checkouts with their own
+    // node_modules, and ESLint walks straight into them: linting the repo
+    // reported thousands of problems from code that isn't ours.
+    ".claude/worktrees/**",
   ]),
 ]);
 
