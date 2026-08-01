@@ -22,7 +22,14 @@ export interface StructureBlockProps {
   style?: React.CSSProperties;
 }
 
-const fills: Partial<Record<StructureKind, string>> = {
+/**
+ * The canonical kind -> token mapping. Filled kinds paint their interior;
+ * `edges` kinds are outline-only, which is how FVG and OTE read on a chart.
+ *
+ * Exported because the platform chart draws the same vocabulary at a different
+ * scale. A second copy of this table would drift the moment a kind is added.
+ */
+export const structureFills: Partial<Record<StructureKind, string>> = {
   bullish: "var(--structure-bullish)",
   bearish: "var(--structure-bearish)",
   ic: "var(--structure-ic)",
@@ -30,10 +37,13 @@ const fills: Partial<Record<StructureKind, string>> = {
   sr: "var(--structure-sr)",
   default: "var(--structure-default)",
 };
-const edges: Partial<Record<StructureKind, string>> = {
+export const structureEdges: Partial<Record<StructureKind, string>> = {
   fvg: "var(--structure-fvg)",
   ote: "var(--structure-ote)",
 };
+
+const fills = structureFills;
+const edges = structureEdges;
 
 /** The chromatic rectangle primitive — always sharp corners. */
 export function StructureBlock({
