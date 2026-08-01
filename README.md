@@ -14,12 +14,33 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Scripts
 
-| Command      | Description                          |
-| ------------ | ------------------------------------ |
-| `pnpm dev`   | Start the dev server                 |
-| `pnpm build` | Production build                     |
-| `pnpm start` | Serve the production build           |
-| `pnpm lint`  | Run ESLint                           |
+| Command            | Description                                            |
+| ------------------ | ------------------------------------------------------ |
+| `pnpm dev`         | Start the dev server                                   |
+| `pnpm build`       | Production build — `next build` plus the OpenNext bundle |
+| `pnpm build:next`  | The plain `next build`                                 |
+| `pnpm start`       | Serve the production build                             |
+| `pnpm lint`        | Run ESLint                                             |
+| `pnpm preview`     | Build and serve the Worker locally via Wrangler        |
+| `pnpm deploy`      | Build and deploy to Cloudflare Workers                 |
+
+There is no test suite. CI runs `pnpm lint`, `pnpm build`, and
+`bash .claude/skills/add-ui-component/scripts/validate.sh`.
+
+## Documentation
+
+| Document | Role |
+| --- | --- |
+| [PRODUCT.md](PRODUCT.md) | What the web surface is for, and what it must never become |
+| [DESIGN.md](DESIGN.md) | UI/UX source of truth — conventions, color meaning, motion |
+| [AGENTS.md](AGENTS.md) | Repository contract for agents and contributors |
+| [CHANGELOG.md](CHANGELOG.md) | Shipped release history |
+| [docs/development-cycle.md](docs/development-cycle.md) | The full idea-to-deploy loop |
+| [docs/sprints/](docs/sprints/) | Backlog, sprint commitments, work logs |
+| [docs/releases/](docs/releases/) | Release contracts, versioning, deploy runbook |
+
+WickdAlgo's product-wide vision lives in
+[wickd-dotnet's PRODUCT.md](https://github.com/WickdAlgo/wickd-dotnet/blob/master/PRODUCT.md).
 
 ## Structure
 
