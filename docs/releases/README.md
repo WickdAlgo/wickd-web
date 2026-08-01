@@ -27,6 +27,7 @@ ceremony; a version closes when its contract's launch gate is satisfied.
 | Version | Status | Target |
 | --- | --- | --- |
 | [v0.1.0](v0.1.0.md) | Draft | first stable marketing surface and platform shell |
+| [v0.2.0](v0.2.0.md) | Draft | platform as frontend host: routes, contracts, real chart, causal replay |
 
 Lifecycle: `Draft` -> `Committed` -> `Shipped`. Use `Cancelled` for an
 abandoned contract. Record scope changes after commitment in the lifecycle log.

@@ -17,7 +17,12 @@ and delivery evidence.
 
 ## Current Sprint
 
-- [Sprint 1: Establish the development cycle](2026-08-01-sprint-1.md)
+- [Sprint 2: Platform as frontend host](2026-08-01-sprint-2.md)
+
+Previous:
+
+- [Sprint 1: Establish the development cycle](2026-08-01-sprint-1.md) — closed
+  on its opening day, so Sprint 2 shares its window.
 
 ## Cadence
 
