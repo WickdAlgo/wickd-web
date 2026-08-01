@@ -113,8 +113,10 @@ an unclaimed candidate is not a commitment.
   and themes stay changeable in one place. The migration covered the pages, the
   UI kit, and the animated logo, but not everything.
 - **Release target:** `docs/releases/v0.1.0.md`
-- **Acceptance:** No hex color literal outside `src/app/globals.css`, and the
-  rule is enforced rather than remembered.
+- **Acceptance:** No hex color literal in `.ts`/`.tsx` outside
+  `src/app/globals.css`; `src/app/icon.svg` is either migrated or recorded in
+  `DESIGN.md` as a stated exemption; and the rule is enforced by the validator
+  rather than remembered.
 - **Technical constraints:**
   - `hero-background.tsx` holds 15 literals in its block table plus the grid
     gradient — these are decorative colors with no current token, so the fix is
@@ -125,8 +127,11 @@ an unclaimed candidate is not a commitment.
     exempt — it renders outside the page and cannot read CSS variables.
   - Add the check to `.claude/skills/add-ui-component/scripts/validate.sh` so
     it cannot regress.
-- **Validation:** `grep -rE '#[0-9a-fA-F]{3,8}' src --include='*.tsx'` returns
-  nothing, and the validator fails when a literal is reintroduced.
+- **Validation:**
+  `grep -rnE '#[0-9a-fA-F]{3,8}' src --include='*.tsx' --include='*.ts' --include='*.svg'`
+  returns nothing except lines covered by a stated exemption — the `--include`
+  list must cover `.svg` so the favicon cannot pass unnoticed — and the
+  validator fails when a literal is reintroduced.
 
 ## Ready
 
