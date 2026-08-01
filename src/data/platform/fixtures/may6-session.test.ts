@@ -87,6 +87,110 @@ describe("may6-session fixture", () => {
     }
   });
 
+  /**
+   * The narrative has to be true of the data, not merely asserted beside it.
+   * An earlier version of this fixture pinned structures to clock times, which
+   * produced a liquidity sweep whose candle never reached the pool it swept and
+   * an inverted price band on the chart. These assertions are what caught it.
+   */
+  describe("structures are real features of the candles", () => {
+    const candleAt = (iso: string) => d.candles.find((c) => c.openTimeUtc === iso)!;
+
+    it("sweeps a pool that price actually traded through", () => {
+      const pool = d.entities.find((e) => e.id === "eqh-001")!;
+      const sweep = d.entities.find((e) => e.id === "sweep-001")!;
+      const poolPrice = pool.subjectPriceHigh!;
+      const sweepCandle = candleAt(sweep.subjectTimeUtc);
+
+      expect(sweepCandle.high).toBeGreaterThan(poolPrice);
+      expect(sweep.subjectPriceHigh!).toBeGreaterThanOrEqual(sweep.subjectPriceLow!);
+    });
+
+    it("places the pool at an actual prior high", () => {
+      const pool = d.entities.find((e) => e.id === "eqh-001")!;
+      expect(candleAt(pool.subjectTimeUtc).high).toBe(pool.subjectPriceHigh);
+    });
+
+    it("draws the fair value gap across a real three-candle gap", () => {
+      const fvg = d.entities.find((e) => e.id === "fvg-042")!;
+      const i = d.candles.findIndex((c) => c.openTimeUtc === fvg.subjectTimeUtc);
+      expect(i).toBeGreaterThan(0);
+      // The defining property: the low after never overlaps the high before.
+      expect(d.candles[i + 1].low).toBeGreaterThan(d.candles[i - 1].high);
+      expect(fvg.subjectPriceHigh!).toBeGreaterThan(fvg.subjectPriceLow!);
+    });
+
+    it("puts the order block on a real down candle before the displacement", () => {
+      const ob = d.entities.find((e) => e.id === "ob-018")!;
+      const fvg = d.entities.find((e) => e.id === "fvg-042")!;
+      const obCandle = candleAt(ob.subjectTimeUtc);
+
+      expect(obCandle.close).toBeLessThan(obCandle.open);
+      expect(Date.parse(ob.subjectTimeUtc)).toBeLessThan(Date.parse(fvg.subjectTimeUtc));
+    });
+
+    it("puts the swing high at the actual high of the analysed window", () => {
+      const swing = d.entities.find((e) => e.id === "swing-hi-001")!;
+      const window = d.candles.slice(0, Math.floor(d.candles.length * 0.75));
+      expect(candleAt(swing.subjectTimeUtc).high).toBe(
+        Math.max(...window.map((c) => c.high)),
+      );
+    });
+
+    it("leaves room after the swing high for its consequences", () => {
+      // The order block's mitigation and the sweep's rejection both happen
+      // after the high. Detecting the high on the last candle would make every
+      // consequence unobservable, which is what searching the full range did.
+      const swing = d.entities.find((e) => e.id === "swing-hi-001")!;
+      const i = d.candles.findIndex((c) => c.openTimeUtc === swing.subjectTimeUtc);
+      expect(i).toBeLessThan(d.candles.length - 1);
+
+      const consequences = d.lifecycle.filter(
+        (l) => l.type === "mitigated" || l.type === "invalidated",
+      );
+      expect(consequences.length).toBeGreaterThan(0);
+      for (const c of consequences) {
+        expect(c.atUtcMs).toBeLessThanOrEqual(
+          d.candles.at(-1)!.atUtcMs + d.run.intervalMs,
+        );
+      }
+    });
+
+    it("puts the swing low at an actual low before that high", () => {
+      const lo = d.entities.find((e) => e.id === "swing-lo-001")!;
+      const hi = d.entities.find((e) => e.id === "swing-hi-001")!;
+      const before = d.candles.filter(
+        (c) => Date.parse(c.openTimeUtc) < Date.parse(hi.subjectTimeUtc),
+      );
+      expect(candleAt(lo.subjectTimeUtc).low).toBe(Math.min(...before.map((c) => c.low)));
+    });
+
+    it("never emits an inverted price band on any entity or zone", () => {
+      for (const e of d.entities) {
+        if (e.subjectPriceLow !== undefined && e.subjectPriceHigh !== undefined) {
+          expect(e.subjectPriceHigh).toBeGreaterThanOrEqual(e.subjectPriceLow);
+        }
+      }
+      for (const layer of d.layers) {
+        for (const p of layer.primitives) {
+          if (p.type === "zone") expect(p.priceHigh).toBeGreaterThanOrEqual(p.priceLow);
+        }
+      }
+    });
+  });
+
+  it("points every relation backwards in time", () => {
+    // A `caused_by` naming a cause that had not happened yet is the graph
+    // equivalent of lookahead, and it is easy to introduce when the structures
+    // are derived rather than hand-ordered.
+    const knownAt = new Map(d.entities.map((e) => [e.id, e.atUtcMs]));
+    for (const r of d.relations) {
+      expect(knownAt.get(r.toEntityId)!).toBeLessThanOrEqual(
+        knownAt.get(r.fromEntityId)!,
+      );
+    }
+  });
+
   it("derives zone geometry from the candles rather than restating it", () => {
     const ob = d.layers
       .find((l) => l.id === "order-blocks")!

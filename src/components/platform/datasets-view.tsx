@@ -1,24 +1,31 @@
-"use client";
-import React from "react";
 import { Button, Tag } from "@/components/ui";
+import type { DatasetSummary, RunSummary } from "@/contracts";
 import { panel } from "@/lib/styles";
+
 const th =
   "font-ui border-b border-hairline px-4 py-2.5 text-left text-[10px] font-medium uppercase tracking-[1px] text-ink-secondary";
 const td = "font-mono border-b border-hairline px-4 py-[11px] text-[12.5px] tracking-[0.3px]";
 
-const dsRows = [
-  { alias: "may6-session", market: "BTC_USDT_PERP", tf: "5m", range: "2026-05-06 00:00 → 05-07 07:00", candles: 372 },
-  { alias: "apr-range", market: "BTC_USDT_PERP", tf: "15m", range: "2026-04-01 00:00 → 04-14 00:00", candles: 1248 },
-  { alias: "q1-trend", market: "ETH_USDT_PERP", tf: "1h", range: "2026-01-01 00:00 → 03-31 00:00", candles: 2160 },
-];
+export interface DatasetsViewProps {
+  datasets: readonly DatasetSummary[];
+  runs: readonly RunSummary[];
+}
 
-const runRows = [
-  { id: "phase-3-smoke", dataset: "may6-session", events: 1284, status: "complete" },
-  { id: "ob-tuning-04", dataset: "apr-range", events: 4907, status: "complete" },
-  { id: "sweep-check", dataset: "q1-trend", events: 0, status: "failed" },
-];
+/** `2026-05-06T00:00:00Z` + `2026-05-07T07:00:00Z` -> `2026-05-06 00:00 → 05-07 07:00`. */
+function formatRange(fromUtc: string, toUtc: string): string {
+  const from = `${fromUtc.slice(0, 10)} ${fromUtc.slice(11, 16)}`;
+  const to = `${toUtc.slice(5, 10)} ${toUtc.slice(11, 16)}`;
+  return `${from} → ${to}`;
+}
 
-export function DatasetsView() {
+/**
+ * A server component — it renders two tables and has no interaction.
+ *
+ * It was marked `"use client"` only because the whole platform used to be one
+ * client tree. Nested routes make the boundary a real choice again, and this
+ * view now ships no JavaScript at all.
+ */
+export function DatasetsView({ datasets, runs }: DatasetsViewProps) {
   return (
     <div className="flex flex-col gap-4">
       <div className={panel}>
@@ -44,13 +51,15 @@ export function DatasetsView() {
               </tr>
             </thead>
             <tbody>
-              {dsRows.map((r) => (
-                <tr key={r.alias}>
-                  <td className={td}>{r.alias}</td>
-                  <td className={td}>{r.market}</td>
-                  <td className={td}>{r.tf}</td>
-                  <td className={`${td} text-ink-secondary`}>{r.range}</td>
-                  <td className={`${td} text-right`}>{r.candles.toLocaleString()}</td>
+              {datasets.map((d) => (
+                <tr key={d.alias}>
+                  <td className={td}>{d.alias}</td>
+                  <td className={td}>{d.instrument.market}</td>
+                  <td className={td}>{d.instrument.timeframe}</td>
+                  <td className={`${td} text-ink-secondary`}>
+                    {formatRange(d.rangeFromUtc, d.rangeToUtc)}
+                  </td>
+                  <td className={`${td} text-right`}>{d.candles.toLocaleString()}</td>
                 </tr>
               ))}
             </tbody>
@@ -72,10 +81,10 @@ export function DatasetsView() {
               </tr>
             </thead>
             <tbody>
-              {runRows.map((r) => (
-                <tr key={r.id}>
-                  <td className={td}>{r.id}</td>
-                  <td className={td}>{r.dataset}</td>
+              {runs.map((r) => (
+                <tr key={r.runId}>
+                  <td className={td}>{r.runId}</td>
+                  <td className={td}>{r.datasetAlias}</td>
                   <td className={`${td} text-right`}>{r.events.toLocaleString()}</td>
                   <td className={td}>
                     <Tag tone={r.status === "complete" ? "long" : "short"}>{r.status}</Tag>

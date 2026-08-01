@@ -1,6 +1,6 @@
 import { parseContract, tradeDetailV1, type TradeDetailV1 } from "@/contracts";
 import { FIVE_MIN_MS } from "./candles";
-import { may6Session } from "./may6-session";
+import { may6Session, may6SessionMarks } from "./may6-session";
 
 /**
  * One mentor trade on the `may6-session` run.
@@ -17,11 +17,8 @@ import { may6Session } from "./may6-session";
  */
 
 const candles = may6Session.candles;
+const marks = may6SessionMarks;
 
-function idx(hhmm: string): number {
-  const [h, m] = hhmm.split(":").map(Number);
-  return (h * 60 + m) / 5;
-}
 function closeAt(i: number): string {
   return new Date(Date.parse(candles[i].openTimeUtc) + FIVE_MIN_MS).toISOString();
 }
@@ -30,19 +27,26 @@ function px(n: number): string {
   return n.toFixed(2);
 }
 
-const I_SETUP = idx("14:25");
-const I_ENTRY = idx("14:40");
-const I_STOP_UPDATE = idx("15:20");
-const I_TP1 = idx("15:35");
-const I_TP2 = idx("16:10");
-const I_EXIT = idx("16:45");
+/**
+ * The plan is anchored to the structures it cites, not to clock times.
+ *
+ * The signal fires once the order block is confirmed — which is the moment the
+ * evidence exists — and everything after is spaced relative to it, clamped so
+ * the trade closes inside the session.
+ */
+function step(offset: number): number {
+  return Math.min(marks.orderBlockConfirmedIndex + offset, candles.length - 1);
+}
 
-const obZone = may6Session.layers
-  .find((l) => l.id === "order-blocks")!
-  .primitives.find((p) => p.type === "zone")!;
+const I_SETUP = marks.orderBlockConfirmedIndex;
+const I_ENTRY = step(3);
+const I_STOP_UPDATE = step(11);
+const I_TP1 = step(16);
+const I_TP2 = step(28);
+const I_EXIT = step(40);
 
-const entryLow = obZone.priceLow;
-const entryHigh = obZone.priceHigh;
+const entryLow = marks.orderBlockLow;
+const entryHigh = marks.orderBlockHigh;
 const entryFillPrice = candles[I_ENTRY].close;
 const initialStop = entryLow - 140;
 const risk = entryFillPrice - initialStop;
@@ -60,7 +64,7 @@ const raw = {
     signalTimeUtc: closeAt(I_SETUP),
     setupName: "OB + FVG continuation",
     thesis:
-      "Equal highs swept and rejected, then displacement left an unmitigated bullish order block with a fair value gap above it. Long the block, targeting the range high.",
+      "Displacement out of a bullish order block left an unmitigated fair value gap above it. Long the block on the retrace, targeting the equal highs resting overhead.",
     invalidationSummary:
       "A five-minute body close below the order block invalidates the continuation read.",
     sourceReference: "signal-log/2026-05-06#14",
@@ -289,9 +293,9 @@ const raw = {
       id: "link-003",
       tradeIdeaId: "trade-btc-001",
       inspectionRunId: may6Session.run.runId,
-      inspectionEntityId: "sweep-001",
+      inspectionEntityId: "swing-lo-001",
       role: "bias_evidence",
-      note: "Failed sweep of the equal highs set the direction.",
+      note: "Higher low off the session low set the direction.",
     },
     {
       id: "link-004",
@@ -299,7 +303,7 @@ const raw = {
       inspectionRunId: may6Session.run.runId,
       inspectionEntityId: "eqh-001",
       role: "liquidity_target",
-      note: "The pool the third target sits under.",
+      note: "The pool the upper targets sit under.",
     },
   ],
   strategyMatches: [

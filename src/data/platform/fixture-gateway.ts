@@ -4,7 +4,7 @@ import type {
   InspectionDatasetV1,
   JournalEntry,
   RunSummary,
-  StructureEventRow,
+  StructureEventItem,
   TradeDetailV1,
   TradeSummary,
 } from "@/contracts";
@@ -66,7 +66,7 @@ export function createFixturePlatformGateway(): PlatformGateway {
       return found;
     },
 
-    async listStructureEvents(runId: string): Promise<readonly StructureEventRow[]> {
+    async listStructureEvents(runId: string): Promise<readonly StructureEventItem[]> {
       if (runId !== may6Session.run.runId) return [];
       return structureEvents;
     },

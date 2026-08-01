@@ -44,10 +44,13 @@ describe("fixture platform gateway", () => {
   it("keeps the journal tail consistent with the inspection run", async () => {
     const tail = await gateway.getJournalTail("phase-3-smoke");
     const run = await gateway.getInspectionRun("phase-3-smoke");
-    const lastCandleMs = Date.parse(run.candles.at(-1)!.openTimeUtc);
+    // Facts become knowable at a candle's close, so the session's last fact can
+    // be stamped one interval past the last candle's open — but no later.
+    const sessionEndMs =
+      Date.parse(run.candles.at(-1)!.openTimeUtc) + run.run.intervalMs;
     expect(tail.length).toBeGreaterThan(0);
     for (const entry of tail) {
-      expect(Date.parse(entry.timeUtc)).toBeLessThanOrEqual(lastCandleMs);
+      expect(Date.parse(entry.timeUtc)).toBeLessThanOrEqual(sessionEndMs);
     }
   });
 

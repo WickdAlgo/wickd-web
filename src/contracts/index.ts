@@ -126,10 +126,10 @@ export {
   runSummary,
   journalEntry,
   backtestRequest,
-  structureEventRow,
+  structureEventItem,
   type DatasetSummary,
   type RunSummary,
   type JournalEntry,
   type BacktestRequest,
-  type StructureEventRow,
+  type StructureEventItem,
 } from "./platform";

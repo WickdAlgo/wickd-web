@@ -53,8 +53,9 @@ abandoned contract. Record scope changes after commitment in the lifecycle log.
   - **Marketing footer** (`src/app/(site)/layout.tsx` -> `Footer` ->
     `VersionList`) — both `web` and `core`. This is the only place the Core
     version appears.
-  - **Platform sidebar** (`src/app/platform/page.tsx`) — the `web` version
-    only, as a mono `Tag` at the bottom of the rail.
+  - **Platform sidebar** (`src/components/platform/platform-sidebar.tsx`) — the
+    `web` version only, as a mono `Tag`. At the bottom of the rail on desktop;
+    at the right-hand end of the strip below `sm`.
 
   Neither marker appears in the nav bar or the mobile drawer. Verify a bump in
   the footer and the platform sidebar; the nav will not change.

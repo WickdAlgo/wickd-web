@@ -4,7 +4,7 @@ import type {
   InspectionDatasetV1,
   JournalEntry,
   RunSummary,
-  StructureEventRow,
+  StructureEventItem,
   TradeDetailV1,
   TradeSummary,
 } from "@/contracts";
@@ -31,7 +31,7 @@ export interface PlatformGateway {
 
   /** Throws `PlatformGatewayError` when the run does not exist. */
   getInspectionRun(runId: string): Promise<InspectionDatasetV1>;
-  listStructureEvents(runId: string): Promise<readonly StructureEventRow[]>;
+  listStructureEvents(runId: string): Promise<readonly StructureEventItem[]>;
   getJournalTail(runId: string, limit?: number): Promise<readonly JournalEntry[]>;
 
   listTrades(): Promise<readonly TradeSummary[]>;

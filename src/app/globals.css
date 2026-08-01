@@ -36,6 +36,10 @@
   --color-graphite: #262d2f;
   --color-iron: #666666;
   --color-slate: #808080;
+  /* Cool grays for text on the inverse surface — the neutrals above read
+     yellow against carbon, which is why these two carry a blue cast. */
+  --color-frost: #d7e0e2;
+  --color-pewter: #9aa5a8;
 
   /* Type scale — one grotesque from 244px posters to 14px nav */
   --text-caption: 12px;
@@ -114,6 +118,8 @@
   --color-ink-secondary: var(--color-iron);
   --color-ink-tertiary: var(--color-slate);
   --color-ink-inverse: var(--color-paper);
+  /* Body copy and code on the inverse surface, where full paper is too loud. */
+  --color-ink-inverse-muted: var(--color-frost);
   --color-hairline: var(--color-concrete);
   --color-strong: var(--color-pebble);
   --color-bullish: var(--color-bull-sage);
@@ -140,7 +146,7 @@
   --surface-nav: rgba(255, 255, 255, 0.75); /* Paper @ 75% — content reads through the bar */
   --text-primary: var(--color-obsidian);
   --text-secondary: var(--color-iron);
-  --text-inverse-muted: #9aa5a8;
+  --text-inverse-muted: var(--color-pewter);
   --border-strong: var(--color-pebble);
   /* Market-structure semantics — the chart convention, direction first */
   --structure-bearish: var(--color-bear-rose);

@@ -47,7 +47,7 @@ export const backtestRequest = z.object({
 export type BacktestRequest = z.infer<typeof backtestRequest>;
 
 /** A single structure event as the inspect list renders it. */
-export const structureEventRow = z.object({
+export const structureEventItem = z.object({
   id: identifier,
   entityId: identifier,
   timeUtc: utcInstant,
@@ -55,4 +55,4 @@ export const structureEventRow = z.object({
   label: z.string().min(1),
   detail: z.string().min(1),
 });
-export type StructureEventRow = z.infer<typeof structureEventRow>;
+export type StructureEventItem = z.infer<typeof structureEventItem>;

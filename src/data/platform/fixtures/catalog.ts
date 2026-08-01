@@ -3,11 +3,11 @@ import {
   journalEntry,
   parseContract,
   runSummary,
-  structureEventRow,
+  structureEventItem,
   type DatasetSummary,
   type JournalEntry,
   type RunSummary,
-  type StructureEventRow,
+  type StructureEventItem,
 } from "@/contracts";
 import { z } from "zod";
 import { may6Session } from "./may6-session";
@@ -95,9 +95,9 @@ export const journalTail: readonly JournalEntry[] = parseContract(
  * Projected from the dataset's entities rather than maintained separately, so
  * the list and the chart cannot disagree about what the run found.
  */
-export const structureEvents: readonly StructureEventRow[] = parseContract(
-  "StructureEventRow[]",
-  z.array(structureEventRow),
+export const structureEvents: readonly StructureEventItem[] = parseContract(
+  "StructureEventItem[]",
+  z.array(structureEventItem),
   may6Session.entities.map((e) => ({
     id: `row-${e.id}`,
     entityId: e.id,

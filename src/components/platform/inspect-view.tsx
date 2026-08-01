@@ -10,41 +10,116 @@ import {
   Tag,
   type TagTone,
 } from "@/components/ui";
+import type { DatasetSummary, StructureEventItem } from "@/contracts";
 import { panel } from "@/lib/styles";
 
-const events: { time: string; kind: TagTone; label: string; detail: string }[] = [
-  { time: "14:35:00Z", kind: "fvg", label: "FVG · bullish", detail: "gap 64,230 → 64,410 · displacement candle" },
-  { time: "14:20:00Z", kind: "bullish", label: "OB · bullish", detail: "last down candle before displacement · 64,050–64,180" },
-  { time: "13:55:00Z", kind: "default", label: "EQH", detail: "equal highs at 64,980 · 3 touches" },
-  { time: "13:40:00Z", kind: "default", label: "$ sweep", detail: "EQH swept · close back inside range" },
-  { time: "13:05:00Z", kind: "bullish", label: "swing high", detail: "HH confirmed at 64,980 · 5m" },
-  { time: "12:50:00Z", kind: "ic", label: "IC", detail: "indecision candle · body 18% of range" },
-];
+export interface InspectViewProps {
+  datasets: readonly DatasetSummary[];
+  events: readonly StructureEventItem[];
+  runId: string;
+  datasetAlias: string;
+  timeframe: string;
+  candleCount: number;
+  structureCount: number;
+  orderBlockCount: number;
+  mitigatedCount: number;
+  sweepCount: number;
+  failedSweepCount: number;
+}
 
-export function InspectView() {
+/**
+ * Maps a structure family onto the design system's `Tag` vocabulary.
+ *
+ * The chart color convention is the engine's, not this component's — blue for
+ * IC and FVG, sage for bullish, rose for bearish, gray for the rest.
+ */
+const familyTone: Record<StructureEventItem["family"], TagTone> = {
+  indecision_candle: "ic",
+  fvg: "fvg",
+  order_block: "bullish",
+  swing: "bullish",
+  liquidity_pool: "default",
+  liquidity_sweep: "default",
+  market_structure_break: "default",
+  breaker: "breaker",
+  ote: "ote",
+};
+
+/**
+ * `2026-05-06T14:20:00.000Z` -> `05-06 14:20`.
+ *
+ * The date matters: a session spans 31 hours, so a bare clock time is ambiguous
+ * and made an ascending list look unsorted.
+ */
+function clockTime(iso: string): string {
+  return `${iso.slice(5, 10)} ${iso.slice(11, 16)}`;
+}
+
+export function InspectView({
+  datasets,
+  events,
+  runId,
+  datasetAlias,
+  timeframe,
+  candleCount,
+  structureCount,
+  orderBlockCount,
+  mitigatedCount,
+  sweepCount,
+  failedSweepCount,
+}: InspectViewProps) {
   const [ov, setOv] = React.useState({ ob: true, fvg: true, liq: true, swing: true });
-  const [sel, setSel] = React.useState(1);
+  const [sel, setSel] = React.useState(0);
   const [tab, setTab] = React.useState("Structures");
+
+  const selected = events[sel];
+
   return (
     <div className="grid grid-cols-1 items-start gap-4 xl:grid-cols-[1fr_340px]">
       <div className="flex flex-col gap-4">
         <div className="flex flex-wrap items-end gap-3">
           <div className="w-[200px]">
-            <Select label="Dataset" mono options={["may6-session", "apr-range", "q1-trend"]} defaultValue="may6-session" />
+            <Select
+              label="Dataset"
+              mono
+              options={datasets.map((d) => d.alias)}
+              defaultValue={datasetAlias}
+            />
           </div>
           <div className="w-[120px]">
-            <Select label="Timeframe" mono options={["1m", "5m", "15m", "1h"]} defaultValue="5m" />
+            <Select
+              label="Timeframe"
+              mono
+              options={["1m", "5m", "15m", "1h"]}
+              defaultValue={timeframe}
+            />
           </div>
           <div className="ml-auto">
-            <Tag mono>run: phase-3-smoke</Tag>
+            <Tag mono>run: {runId}</Tag>
           </div>
         </div>
-        <CandleChart height={330} showOB={ov.ob} showFVG={ov.fvg} showLiquidity={ov.liq} showSwing={ov.swing} />
+        <CandleChart
+          height={330}
+          showOB={ov.ob}
+          showFVG={ov.fvg}
+          showLiquidity={ov.liq}
+          showSwing={ov.swing}
+        />
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-          <StatCard label="Candles replayed" value="372" />
-          <StatCard label="Structure events" value="1,284" />
-          <StatCard label="Order blocks" value="18" delta="6 mitigated" tone="long" />
-          <StatCard label="Liquidity sweeps" value="9" delta="3 failed" tone="short" />
+          <StatCard label="Candles replayed" value={candleCount.toLocaleString()} />
+          <StatCard label="Structure events" value={structureCount.toLocaleString()} />
+          <StatCard
+            label="Order blocks"
+            value={orderBlockCount.toLocaleString()}
+            delta={`${mitigatedCount} mitigated`}
+            tone="long"
+          />
+          <StatCard
+            label="Liquidity sweeps"
+            value={sweepCount.toLocaleString()}
+            delta={`${failedSweepCount} failed`}
+            tone="short"
+          />
         </div>
       </div>
       <div className="flex flex-col gap-4">
@@ -67,9 +142,9 @@ export function InspectView() {
             <div>
               {events.map((e, i) => (
                 <StructureEventRow
-                  key={i}
-                  time={e.time}
-                  kind={e.kind}
+                  key={e.id}
+                  time={clockTime(e.timeUtc)}
+                  kind={familyTone[e.family]}
                   label={e.label}
                   detail={e.detail}
                   selected={sel === i}
@@ -81,27 +156,30 @@ export function InspectView() {
               ))}
             </div>
           ) : (
-            <div className="p-4">
-              <Tag tone={events[sel].kind}>{events[sel].label}</Tag>
-              <div className="font-mono mt-3 mb-2 text-[12px] text-ink-secondary">
-                2026-05-06T{events[sel].time}
+            selected && (
+              <div className="p-4">
+                <Tag tone={familyTone[selected.family]}>{selected.label}</Tag>
+                <div className="font-mono mt-3 mb-2 text-[12px] text-ink-secondary">
+                  {selected.timeUtc}
+                </div>
+                <div className="font-ui text-[13px] leading-[1.6] tracking-[0.3px]">
+                  {selected.detail}
+                </div>
+                <pre className="font-mono mt-3.5 overflow-x-auto rounded-md bg-inverse p-3 text-[11px] leading-[1.6] text-ink-inverse-muted">
+                  {JSON.stringify(
+                    {
+                      knownAt: selected.timeUtc,
+                      entityId: selected.entityId,
+                      family: selected.family,
+                      detail: selected.detail,
+                      runId,
+                    },
+                    null,
+                    1,
+                  )}
+                </pre>
               </div>
-              <div className="font-ui text-[13px] leading-[1.6] tracking-[0.3px]">
-                {events[sel].detail}
-              </div>
-              <pre className="font-mono mt-3.5 overflow-x-auto rounded-md bg-inverse p-3 text-[11px] leading-[1.6] text-[#d7e0e2]">
-                {JSON.stringify(
-                  {
-                    t: "2026-05-06T" + events[sel].time,
-                    kind: events[sel].kind,
-                    detail: events[sel].detail,
-                    runId: "phase-3-smoke",
-                  },
-                  null,
-                  1,
-                )}
-              </pre>
-            </div>
+            )
           )}
         </div>
       </div>
