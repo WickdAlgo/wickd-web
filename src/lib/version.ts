@@ -1,5 +1,6 @@
 /**
- * Build markers shown in the site chrome (nav bar, mobile drawer, platform sidebar).
+ * Build markers. Rendered in the marketing footer (both, via VersionList) and
+ * the platform sidebar (WEB_VERSION only) — not in the nav bar or drawer.
  *
  * Both strings are resolved and inlined by next.config.ts, which is the only place
  * that can read the manifests — see the notes there. This module is just the typed
