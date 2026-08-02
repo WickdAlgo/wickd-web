@@ -184,16 +184,27 @@ Workers Builds builds every branch it is pushed, and publishes each at its own
 **public** hostname:
 
 ```text
-https://stage-wickd-web.<subdomain>.workers.dev   # persistent staging
-https://<branch-slug>-wickd-web.<subdomain>.workers.dev   # follows the branch
-https://<hash>-wickd-web.<subdomain>.workers.dev          # pinned to a commit
+https://<branch-slug>-wickd-web.<subdomain>.workers.dev   # mutable alias
+https://<version-prefix>-wickd-web.<subdomain>.workers.dev   # immutable
 ```
 
-`stage` is the only one of these that is stable and worth linking. The rest
-come and go with their branches, and the Cloudflare bot posts them into the
-pull request. All of them are unauthenticated and indexable by anyone holding
-the URL. `pnpm preview` above is the *local* Wrangler server and is unrelated
-— the collision in the word "preview" is easy to trip over.
+The two forms behave differently, and the difference matters when you need to
+reproduce or preserve an exact deployment:
+
+- A **branch alias** always serves the latest version built from that branch.
+  It lives as long as the branch does, so `stage-wickd-web…` and
+  `dev-wickd-web…` are permanent fixtures now, while a feature branch's alias
+  disappears when the branch is deleted.
+- A **version preview** is pinned to one uploaded Worker version and never
+  moves. Its prefix is the Worker version ID, **not** the Git commit hash, so
+  it cannot be reconstructed from a SHA — capture it from the Cloudflare
+  build or the pull request comment while it is in front of you. It survives
+  the branch being deleted.
+
+The Cloudflare bot posts both into the pull request. All of them are
+unauthenticated and indexable by anyone holding the URL. `pnpm preview` above
+is the *local* Wrangler server and is unrelated — the collision in the word
+"preview" is easy to trip over.
 
 The consequence worth internalizing is unchanged by the branch topology:
 **a push publishes, not only a merge.** Treat opening or updating a pull
