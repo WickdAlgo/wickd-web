@@ -14,21 +14,30 @@ Work moves through three long-lived branches:
 ```text
 feature/*, fix/* --PR--> dev --PR--> stage --PR--> main
                           |            |            |
-                       no build   public stage   production
+                     public branch  public stage  production
 ```
 
 | Branch | Role | Workers Builds |
 | --- | --- | --- |
-| `dev` | Default integration | No build |
+| `dev` | Default integration | Public branch hostname |
 | `stage` | Rehearsal | Persistent public staging build |
 | `main` | Production | Every commit deploys |
 
 `dev` is the GitHub default branch. Direct pushes are allowed so integration
-stays fast, but Workers Builds does not build it and it publishes no public
-hostname. Feature and fix pull requests target `dev`.
+stays fast. Feature and fix pull requests target `dev`.
 
-`stage` accepts pull requests with a green, up-to-date `verify` check. Workers
-Builds publishes it at the persistent, unauthenticated hostname
+Workers Builds has no per-branch include list — *Branch control* offers a
+production-branch dropdown and one **Builds for non-production branches**
+checkbox covering every non-production branch at once. That checkbox is
+enabled, so `dev` and every pushed feature branch build to their own public
+hostnames exactly as before. Restricting the build to `stage` alone would
+mean a second Workers Builds connection with its own `wrangler.jsonc`
+environment, because `WORKER_SELF_REFERENCE` must match the Worker name.
+That is deliberately not done: `WEB-BL-016` is the item that closes the
+public-exposure question, and splitting the deploy first would only move it.
+
+`stage` accepts pull requests with a green `verify` check. Workers Builds
+publishes it at the persistent, unauthenticated hostname
 `https://stage-wickd-web.<subdomain>.workers.dev`. `main` has the same pull
 request and check requirements, and every commit on it deploys to production.
 
@@ -41,20 +50,38 @@ Two ancestry rules are load-bearing:
    and raises the same conflicts again. Feature pull requests into `dev` may
    squash freely. The `protect-stage` and `protect-main` rulesets enforce this
    by setting `allowed_merge_methods` to `merge` only.
-2. A hotfix to `main` must return down the branch chain before the next
-   promotion. Branch from `main`, open a pull request into `main`, then open
-   back-merge pull requests from `main` to `stage` and from `stage` to `dev`.
-   Without those back-merges, the next `stage` to `main` promotion carries the
-   pre-hotfix state of the affected files and silently reverts the fix. Strict
-   required status checks also prevent `stage` from merging into `main` while
-   it is behind `main`.
+2. A hotfix to `main` must return down the branch chain. Branch from `main`,
+   open a pull request into `main`, then open back-merge pull requests from
+   `main` to `stage` and from `stage` to `dev`. A later promotion will not
+   usually undo the fix — a three-way merge keeps `main`'s side when only
+   `main` touched those lines — but until the back-merges land, `dev` and
+   `stage` build, test, and rehearse code that still contains the bug, and
+   every subsequent touch of those files risks a conflict resolved against
+   stale context. Back-merge while the reason is still fresh.
+
+### Promotion leaves the source branch behind, and that is fine
+
+Merging a promotion pull request creates a merge commit on the *target*, so
+`dev` is immediately one commit behind `stage`, and `stage` one behind `main`.
+Nothing needs to be done about it. Git's merge base advances correctly, so the
+next promotion carries only genuinely new work and does not re-diff what has
+already shipped.
+
+This is why `strict_required_status_checks_policy` is **off**. "Require
+branches to be up to date before merging" suits a feature-branch model where
+the head is expected to catch up to its base. In a promotion pipeline the
+source is structurally behind after every lap, so a strict policy would block
+each promotion until a back-merge, turning a two-pull-request cycle into a
+four-pull-request one and buying nothing: `verify` already runs against the
+merge result rather than the head commit.
 
 All three GitHub rulesets have `enforcement: active` and empty
 `bypass_actors`, so they apply to the administrator as well:
 
 - `protect-main` and `protect-stage` require a pull request and the `verify`
-  check with `strict_required_status_checks_policy` enabled. They allow only
-  merge commits and block deletion and non-fast-forward pushes.
+  check, with `strict_required_status_checks_policy` **disabled** for the
+  reason above. They allow only merge commits and block deletion and
+  non-fast-forward pushes.
 - Their `required_approving_review_count` is `0`. A sole maintainer cannot
   approve their own pull request, so any higher value would deadlock every
   merge without adding review.
@@ -151,24 +178,41 @@ pnpm build     # next build + the OpenNext bundle in .open-next/
 pnpm preview   # build and serve the Worker locally through Wrangler
 ```
 
-### Staging and local preview URLs
+### Staging, branch, and local preview URLs
 
-Workers Builds restricts non-production builds to `stage`. Feature and fix
-branches and `dev` are not built, so they publish no branch or commit hostname.
-Every push to `stage` updates one persistent **public** staging hostname:
+Workers Builds builds every branch it is pushed, and publishes each at its own
+**public** hostname:
 
 ```text
-https://stage-wickd-web.<subdomain>.workers.dev
+https://<branch-slug>-wickd-web.<subdomain>.workers.dev   # mutable alias
+https://<version-prefix>-wickd-web.<subdomain>.workers.dev   # immutable
 ```
 
-The hostname is unauthenticated and indexable by anyone holding the URL.
-`pnpm preview` above is the *local* Wrangler server and is unrelated — the
-collision in the word "preview" is easy to trip over.
+The two forms behave differently, and the difference matters when you need to
+reproduce or preserve an exact deployment:
 
-The consequence is now narrower: **a push to `stage` publishes; a feature or
-`dev` push does not.** Anything that must not be public — private datasets,
-personal or third-party trade data, unreleased copy — cannot reach `stage`
-until `WEB-BL-016` gates the staging hostname as well as the production one.
+- A **branch alias** always serves the latest version built from that branch.
+  It lives as long as the branch does, so `stage-wickd-web…` and
+  `dev-wickd-web…` are permanent fixtures now, while a feature branch's alias
+  disappears when the branch is deleted.
+- A **version preview** is pinned to one uploaded Worker version and never
+  moves. Its prefix is the Worker version ID, **not** the Git commit hash, so
+  it cannot be reconstructed from a SHA — capture it from the Cloudflare
+  build or the pull request comment while it is in front of you. It survives
+  the branch being deleted.
+
+The Cloudflare bot posts both into the pull request. All of them are
+unauthenticated and indexable by anyone holding the URL. `pnpm preview` above
+is the *local* Wrangler server and is unrelated — the collision in the word
+"preview" is easy to trip over.
+
+The consequence worth internalizing is unchanged by the branch topology:
+**a push publishes, not only a merge.** Treat opening or updating a pull
+request as putting that build on the public internet. Anything that must not
+be public — private datasets, personal or third-party trade data, unreleased
+copy — cannot be in a pushed branch until `WEB-BL-016` gates the branch and
+staging hostnames as well as the production one. Adding `stage` added one
+more permanent public hostname; it removed none.
 
 ### Manual deploys
 
