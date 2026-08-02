@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { Button } from "@/components/ui";
 import { JournalListView } from "@/components/platform/journal-list-view";
 import { platformNavItem } from "@/components/platform/nav-items";
 import { PlatformHeader } from "@/components/platform/platform-header";
@@ -12,7 +14,17 @@ export default async function JournalPage() {
 
   return (
     <>
-      <PlatformHeader title={nav.label} blurb={nav.blurb} />
+      <PlatformHeader
+        title={nav.label}
+        blurb={nav.blurb}
+        actions={
+          <Link href="/platform/journal/new" className="no-underline">
+            <Button size="sm" arrow>
+              Capture a trade
+            </Button>
+          </Link>
+        }
+      />
       <JournalListView trades={trades} />
     </>
   );

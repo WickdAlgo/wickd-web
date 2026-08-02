@@ -153,12 +153,18 @@ export function TradeDetailView({ trade, dataset }: TradeDetailViewProps) {
             <StatCard
               label="Reported R"
               value={tradeSlice.execution?.mentorReportedR ?? "—"}
-              delta="as signalled"
+              delta={trade.idea.source === "mentor" ? "as signalled" : "not reported"}
             />
             <StatCard
               label="Your net R"
               value={tradeSlice.execution?.netR ?? "—"}
-              delta="after fees"
+              // A captured trade has no result until the domain layer computes
+              // one. Saying so beats an em dash that reads like a data bug.
+              delta={
+                tradeSlice.execution && tradeSlice.execution.netR === undefined
+                  ? "pending settlement"
+                  : "after fees"
+              }
               tone={
                 tradeSlice.execution?.netR === undefined
                   ? undefined

@@ -1,11 +1,21 @@
 import type {
+  AppendFillInput,
+  AppendSignalEventInput,
   BacktestRequest,
+  CreateExecutionInput,
+  CreateTradeIdeaInput,
   DatasetSummary,
+  Execution,
+  Fill,
   InspectionDatasetV1,
   JournalEntry,
+  MoveTradeLevelInput,
   RunSummary,
+  SaveTradeReviewInput,
+  SignalEvent,
   StructureEventItem,
   TradeDetailV1,
+  TradeReview,
   TradeSummary,
 } from "@/contracts";
 import {
@@ -17,6 +27,7 @@ import {
 import { may6Session } from "./fixtures/may6-session";
 import { tradeBtc001 } from "./fixtures/trade-btc-001";
 import { PlatformGatewayError, type PlatformGateway } from "./gateway";
+import { createJournalStore } from "./journal-store";
 
 /**
  * The gateway backed by fixtures.
@@ -28,7 +39,6 @@ import { PlatformGatewayError, type PlatformGateway } from "./gateway";
  * than acquiring the habit of assuming success.
  */
 
-const trades: readonly TradeDetailV1[] = [tradeBtc001];
 const inspectionRuns: readonly InspectionDatasetV1[] = [may6Session];
 
 function toSummary(trade: TradeDetailV1): TradeSummary {
@@ -46,6 +56,10 @@ function toSummary(trade: TradeDetailV1): TradeSummary {
 }
 
 export function createFixturePlatformGateway(): PlatformGateway {
+  // Seeded with the fixture trade and mutable for the session. Writes are real
+  // against the contract and are not durable — see `journal-store.ts`.
+  const journal = createJournalStore([tradeBtc001]);
+
   return {
     async listDatasets(): Promise<readonly DatasetSummary[]> {
       return datasets;
@@ -77,15 +91,47 @@ export function createFixturePlatformGateway(): PlatformGateway {
     },
 
     async listTrades(): Promise<readonly TradeSummary[]> {
-      return trades.map(toSummary);
+      return journal.list().map(toSummary);
     },
 
     async getTrade(tradeId: string): Promise<TradeDetailV1> {
-      const found = trades.find((t) => t.idea.id === tradeId);
-      if (!found) {
-        throw new PlatformGatewayError("not_found", `no trade named "${tradeId}"`);
-      }
-      return found;
+      return journal.get(tradeId);
+    },
+
+    async createTrade(input: CreateTradeIdeaInput): Promise<TradeDetailV1> {
+      return journal.createTrade(input);
+    },
+
+    async appendSignalEvent(
+      tradeId: string,
+      input: AppendSignalEventInput,
+    ): Promise<SignalEvent> {
+      return journal.appendSignalEvent(tradeId, input);
+    },
+
+    async moveTradeLevel(
+      tradeId: string,
+      input: MoveTradeLevelInput,
+    ): Promise<TradeDetailV1> {
+      return journal.moveTradeLevel(tradeId, input);
+    },
+
+    async createExecution(
+      tradeId: string,
+      input: CreateExecutionInput,
+    ): Promise<Execution> {
+      return journal.createExecution(tradeId, input);
+    },
+
+    async appendFill(tradeId: string, input: AppendFillInput): Promise<Fill> {
+      return journal.appendFill(tradeId, input);
+    },
+
+    async saveReview(
+      tradeId: string,
+      input: SaveTradeReviewInput,
+    ): Promise<TradeReview> {
+      return journal.saveReview(tradeId, input);
     },
 
     async startBacktest(

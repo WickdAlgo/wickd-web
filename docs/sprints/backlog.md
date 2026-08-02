@@ -355,7 +355,25 @@ depend on.
   - IDs are per-repository: wickd-dotnet numbers `WKD-BL-NNN` independently.
   - The current Core release is structure-first and must not be disturbed; the
     platform API is a downstream consumer.
-- **Validation:** The cross-reference resolves in both directions.
+  - **`WKD-BL-005` is the dependency, not the API host.** It defines the
+    canonical `InspectionDataset`, its JSON Schema, and generated TypeScript —
+    which is what makes `src/contracts/inspection-dataset.ts` canonical rather
+    than provisional. The API cannot serve inspection endpoints before it
+    exists. Order the .NET work accordingly.
+  - **`WKD-BL-006` is superseded and must be closed.** It specifies a React
+    structure inspector — Lightweight Charts, Final/Causal views, layer
+    toggles, evidence selection, a time scrubber, Vitest/RTL/Playwright — in a
+    `ui/` folder in wickd-dotnet. That surface was built here in Sprint 2 and
+    lives in `src/features/chart/` and `src/features/replay/`. Left `Ready`, it
+    invites the same component being built twice in two repositories.
+  - Five constraints the web implementation learned, each from a real defect:
+    trade levels are append-only intervals rather than updates; structure
+    entities carry no terminal-state column; money is `decimal` serialized as a
+    string; every journaled fact needs a `sequence`; and the API returns
+    everything rather than pre-filtering by `asOf`, so the client can show what
+    was knowable when.
+- **Validation:** The cross-reference resolves in both directions, and
+  `WKD-BL-006` no longer reads as unstarted work.
 
 ### WEB-BL-014: The Mentor Diary Is Not Rendered
 
@@ -443,21 +461,28 @@ depend on.
 - **Acceptance:** A trade can be captured in the UI with levels, fills,
   screenshots, and notes, and survives a deploy.
 - **Technical constraints:**
-  - **This needs an architectural decision, not just implementation.**
-    `docs/architecture/001-platform-and-journal-boundaries.md` states that this
-    repository owns no persistence and that route handlers must not become a
-    backend; `PRODUCT.md` says the same. A capture form requires storage, and
-    `Wickd.Platform.Api` does not exist.
-  - Two honest routes: wait for the .NET API, or amend ADR 001 to allow a
-    clearly-isolated store here (D1 for records, R2 for screenshots) behind the
-    `WEB-BL-016` access boundary. Record whichever is chosen and why.
-  - Whatever is chosen, the boundary that must not move is authoritative
-    calculation: capture may store what the user enters and must not derive R,
-    PnL, or risk. That constraint is what keeps the eventual migration honest.
-  - Screenshots should be stored, not hotlinked — the mentor data demonstrates
-    why.
-  - The `PlatformGateway` interface already isolates this; adding write methods
-    to it keeps every view unchanged when the backend moves.
+  - **Decided: `Wickd.Platform.Api` with PostgreSQL owns the journal.** No
+    persistence lands in this repository, so
+    `docs/architecture/001-platform-and-journal-boundaries.md` and `PRODUCT.md`
+    stand as written — no amendment is required. An earlier D1 proposal was
+    dropped because it would have made Postgres and D1 two owners of one
+    dataset, with a migration for records that do not exist yet.
+  - Screenshots still go to R2, which is S3-compatible and therefore reachable
+    from the .NET API directly. That part of the Cloudflare choice survives.
+  - Build the store-agnostic half here: the capture forms and write methods on
+    `PlatformGateway`, implemented against a session-scoped in-memory store so
+    the flow is exercisable and testable before the API exists. When the API
+    lands it is one `HttpPlatformGateway` and no view changes.
+  - **Capture must not compute anything.** It records what the user enters; R,
+    PnL, and net risk come back from the domain layer. Until they do, the UI
+    shows them as pending rather than deriving a placeholder — a computed
+    stand-in is how a frontend quietly becomes the source of truth.
+  - The form must emit a payload that validates against `TradeDetailV1`, and
+    should let the user export it. Until the API exists that JSON is the bridge:
+    it can be committed as a fixture or replayed into the API later, so
+    capturing a trade today is not wasted.
+  - Do not merge to `main` before `WEB-BL-016`. Merging deploys, and this
+    surface is publicly reachable until the access boundary lands.
 - **Validation:** A trade captured through the form renders in the journal and
   in the trade-detail chart, and survives a redeploy.
 

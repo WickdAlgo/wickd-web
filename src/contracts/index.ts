@@ -120,6 +120,26 @@ export {
   type NormalizedFill,
 } from "./journal";
 
+// Journal write inputs
+export {
+  createTradeIdeaInput,
+  createTradeLevelInput,
+  appendSignalEventInput,
+  moveTradeLevelInput,
+  createExecutionInput,
+  appendFillInput,
+  saveTradeReviewInput,
+  attachScreenshotInput,
+  type CreateTradeIdeaInput,
+  type CreateTradeLevelInput,
+  type AppendSignalEventInput,
+  type MoveTradeLevelInput,
+  type CreateExecutionInput,
+  type AppendFillInput,
+  type SaveTradeReviewInput,
+  type AttachScreenshotInput,
+} from "./journal-input";
+
 // Platform listings
 export {
   datasetSummary,
