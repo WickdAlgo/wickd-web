@@ -92,6 +92,27 @@ pnpm build     # next build + the OpenNext bundle in .open-next/
 pnpm preview   # build and serve the Worker locally through Wrangler
 ```
 
+### Branch and commit preview URLs
+
+Workers Builds does not only build `main`. It builds pull-request branches and
+publishes each one at its own **public** hostname:
+
+```text
+https://<branch-slug>-wickd-web.<subdomain>.workers.dev   # follows the branch
+https://<hash>-wickd-web.<subdomain>.workers.dev          # pinned to a commit
+```
+
+These are unauthenticated and indexable by anyone holding the URL, and the
+Cloudflare bot posts them into the pull request. `pnpm preview` above is the
+*local* Wrangler server and is unrelated — the collision in the word "preview"
+is easy to trip over.
+
+The consequence worth internalizing: **a push publishes, not only a merge.**
+Treat opening or updating a pull request as putting that build on the public
+internet. Anything that must not be public — private datasets, personal or
+third-party trade data, unreleased copy — cannot be in a pushed branch until
+`WEB-BL-016` gates the preview hostnames as well as the production one.
+
 ### Manual deploys
 
 `pnpm deploy` builds and pushes straight to the production Worker from a local

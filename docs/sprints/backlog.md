@@ -433,23 +433,33 @@ depend on.
 - **Area:** repository-wide, `wrangler.jsonc`, `PRODUCT.md`
 - **User value:** The platform is about to hold a third party's trade diary and
   the maintainer's own trades, screenshots, and notes. It is currently a public
-  route on a public site, in a public repository that deploys on every merge.
+  route on a public site, in a public repository that deploys on every merge —
+  **and on every push to a pull-request branch.**
 - **Release target:** `docs/releases/v0.3.0.md` (not yet opened)
 - **Acceptance:** Journal data is absent from the git repository and from the
   public build, and `/platform` is reachable only by an authenticated
-  maintainer.
+  maintainer **on every hostname that serves it, previews included**.
 - **Technical constraints:**
   - Chosen direction: keep one repository and one deploy; the build reads
     journal data from `wickd-data` (private) so nothing is committed here, and
     Cloudflare Access gates `/platform`. The marketing surface stays public.
   - Access must cover the route's JavaScript chunks, not only its HTML — a
     gated page whose data chunk is public is not gated.
+  - **Branch and commit previews are separate public hostnames.** Workers
+    Builds served PR #11 at
+    `feat-platform-journal-w0-w5-wickd-web.burak-dorman.workers.dev` with all
+    of `/platform` reachable unauthenticated, before any merge. A policy
+    scoped to the production hostname leaves that open. Gate the
+    `*-wickd-web.<subdomain>.workers.dev` pattern too, or disable preview URLs
+    — otherwise a *push* publishes the journal and this item can be marked
+    done with the hole still in place.
   - `PRODUCT.md` currently describes one public surface. An access boundary is
     a constitutional change and needs an Amendments entry.
   - The public build must remain buildable with no `wickd-data` present, or CI
     on a fork breaks.
 - **Validation:** A logged-out request to `/platform` and to its chunks is
-  refused; `git grep` finds no mentor or personal trade data.
+  refused **on both the production hostname and a live branch preview**;
+  `git grep` finds no mentor or personal trade data.
 
 ### WEB-BL-017: There Is No Way To Record A Trade
 
@@ -481,8 +491,11 @@ depend on.
     should let the user export it. Until the API exists that JSON is the bridge:
     it can be committed as a fixture or replayed into the API later, so
     capturing a trade today is not wasted.
-  - Do not merge to `main` before `WEB-BL-016`. Merging deploys, and this
-    surface is publicly reachable until the access boundary lands.
+  - Do not put real trade data behind this form before `WEB-BL-016`. The
+    original wording here said "do not merge to `main`", which understated it:
+    Workers Builds also deploys pull-request branches to public preview
+    hostnames, so a **push** publishes this surface, not just a merge. Fixture
+    data is safe to push; personal or mentor data is not.
 - **Validation:** A trade captured through the form renders in the journal and
   in the trade-detail chart, and survives a redeploy.
 

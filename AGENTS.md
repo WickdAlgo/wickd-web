@@ -49,6 +49,9 @@ Workflow rules:
 - Merge reviewed work to `main` after required checks pass.
 - Merging to `main` deploys. Cloudflare Workers Builds runs on every `main`
   commit, so a merge is a production release.
+- Pushing a pull-request branch also deploys it, to a public preview hostname.
+  Nothing private belongs in a pushed branch. `docs/releases/README.md` covers
+  both paths.
 - Workers Builds is the only *sanctioned* deploy path. `pnpm deploy` also
   pushes straight to the production Worker from a local machine, bypassing
   review, CI, and the deployment record — treat it as an incident escape
