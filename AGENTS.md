@@ -46,12 +46,17 @@ Workflow rules:
 - Use Conventional Commits and `.github/pull_request_template.md`. Pull
   requests identify sprint/backlog, validation, changelog, release,
   deployment, configuration, risk, and follow-up impact.
-- Merge reviewed work to `main` after required checks pass.
-- Merging to `main` deploys. Cloudflare Workers Builds runs on every `main`
-  commit, so a merge is a production release.
-- Pushing a pull-request branch also deploys it, to a public preview hostname.
-  Nothing private belongs in a pushed branch. `docs/releases/README.md` covers
-  both paths.
+- Feature and fix pull requests target `dev`, the default integration branch.
+  Promote `dev` to `stage`, then `stage` to `main`, through pull requests with
+  green `verify` checks. `dev` does not build; `stage` is the persistent public
+  rehearsal; every `main` commit deploys to production.
+- Promotion pull requests must use merge commits, never squash or rebase, so
+  the source branch retains a merged ancestry link. Feature pull requests into
+  `dev` may squash. `docs/releases/README.md` owns the full rationale.
+- Hotfixes branch from and merge into `main`, then return through back-merge
+  pull requests from `main` to `stage` and from `stage` to `dev` before the
+  next promotion. Skipping the back-merges can silently revert the fix.
+  `docs/releases/README.md` governs the complete path.
 - Workers Builds is the only *sanctioned* deploy path. `pnpm deploy` also
   pushes straight to the production Worker from a local machine, bypassing
   review, CI, and the deployment record — treat it as an incident escape
@@ -128,8 +133,8 @@ pnpm preview
 - `test:e2e` runs the Playwright workflow spec against `pnpm start`.
 
 `.github/workflows/ci.yml` runs `pnpm lint`, `pnpm test`, `pnpm build`, the
-design-system validator, and `pnpm test:e2e` on every push to `main` and every
-pull request.
+design-system validator, and `pnpm test:e2e` on every push to `main`, `stage`,
+and `dev`, and on every pull request.
 
 ## Coding Style & Naming Conventions
 

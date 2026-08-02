@@ -29,7 +29,10 @@
 - [ ] `version` in `package.json` matches `X.Y.Z`.
 - [ ] `pnpm preview` serves the affected routes correctly at desktop and mobile
   widths, including reduced motion.
-- [ ] The release-prep pull request is ready to merge to `main`.
+- [ ] Release prep has landed on `dev`, and the `stage` -> `main` promotion
+  pull request is ready.
+- [ ] `stage` has been checked at
+  `stage-wickd-web.<subdomain>.workers.dev` and is not behind `main`.
 
 ## Deployment Record
 
