@@ -3,10 +3,15 @@ name: Sync Core version
 # Records the Wickd.Core version in core-version.json so the site can display it.
 # Core ships from wickd-dotnet, which fires the repository_dispatch below on release.
 #
-# The push is what deploys: Workers Builds is still the only deploy path, and it
-# picks this commit up like any other. That means the token must be a PAT, not the
-# default GITHUB_TOKEN — pushes made with GITHUB_TOKEN deliberately do not trigger
-# downstream workflows, so `verify` would never run on the bump.
+# The bump lands on `dev` and rides the promotion train, so it reaches production
+# at the next `stage` -> `main` promotion rather than deploying on its own. The
+# checkout ref is pinned rather than left to default on purpose: it happens to be
+# `dev` today, and a future default-branch change must not silently redirect an
+# automated push.
+#
+# The token must still be a PAT, not the default GITHUB_TOKEN — pushes made with
+# GITHUB_TOKEN deliberately do not trigger downstream workflows, so `verify` would
+# never run on the bump, and `dev` has no other gate.
 #
 # Manual runs are for correcting a bad sync without waiting on a Core release.
 
@@ -25,6 +30,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
+          ref: dev
           token: ${{ secrets.CORE_VERSION_SYNC_TOKEN }}
 
       - name: Resolve and validate the incoming version
