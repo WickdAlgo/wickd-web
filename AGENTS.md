@@ -56,8 +56,9 @@ Workflow rules:
   `dev` may squash. `docs/releases/README.md` owns the full rationale.
 - Hotfixes branch from and merge into `main`, then return through back-merge
   pull requests from `main` to `stage` and from `stage` to `dev` before the
-  next promotion. Skipping the back-merges can silently revert the fix.
-  `docs/releases/README.md` governs the complete path.
+  next promotion. Until they land, `dev` and `stage` rehearse code that still
+  contains the bug. `docs/releases/README.md` governs the complete path, and
+  explains why a promotion leaves its source branch one commit behind.
 - Workers Builds is the only *sanctioned* deploy path. `pnpm deploy` also
   pushes straight to the production Worker from a local machine, bypassing
   review, CI, and the deployment record — treat it as an incident escape
