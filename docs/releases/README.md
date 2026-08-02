@@ -14,18 +14,27 @@ Work moves through three long-lived branches:
 ```text
 feature/*, fix/* --PR--> dev --PR--> stage --PR--> main
                           |            |            |
-                       no build   public stage   production
+                     public branch  public stage  production
 ```
 
 | Branch | Role | Workers Builds |
 | --- | --- | --- |
-| `dev` | Default integration | No build |
+| `dev` | Default integration | Public branch hostname |
 | `stage` | Rehearsal | Persistent public staging build |
 | `main` | Production | Every commit deploys |
 
 `dev` is the GitHub default branch. Direct pushes are allowed so integration
-stays fast, but Workers Builds does not build it and it publishes no public
-hostname. Feature and fix pull requests target `dev`.
+stays fast. Feature and fix pull requests target `dev`.
+
+Workers Builds has no per-branch include list — *Branch control* offers a
+production-branch dropdown and one **Builds for non-production branches**
+checkbox covering every non-production branch at once. That checkbox is
+enabled, so `dev` and every pushed feature branch build to their own public
+hostnames exactly as before. Restricting the build to `stage` alone would
+mean a second Workers Builds connection with its own `wrangler.jsonc`
+environment, because `WORKER_SELF_REFERENCE` must match the Worker name.
+That is deliberately not done: `WEB-BL-016` is the item that closes the
+public-exposure question, and splitting the deploy first would only move it.
 
 `stage` accepts pull requests with a green, up-to-date `verify` check. Workers
 Builds publishes it at the persistent, unauthenticated hostname
@@ -151,24 +160,30 @@ pnpm build     # next build + the OpenNext bundle in .open-next/
 pnpm preview   # build and serve the Worker locally through Wrangler
 ```
 
-### Staging and local preview URLs
+### Staging, branch, and local preview URLs
 
-Workers Builds restricts non-production builds to `stage`. Feature and fix
-branches and `dev` are not built, so they publish no branch or commit hostname.
-Every push to `stage` updates one persistent **public** staging hostname:
+Workers Builds builds every branch it is pushed, and publishes each at its own
+**public** hostname:
 
 ```text
-https://stage-wickd-web.<subdomain>.workers.dev
+https://stage-wickd-web.<subdomain>.workers.dev   # persistent staging
+https://<branch-slug>-wickd-web.<subdomain>.workers.dev   # follows the branch
+https://<hash>-wickd-web.<subdomain>.workers.dev          # pinned to a commit
 ```
 
-The hostname is unauthenticated and indexable by anyone holding the URL.
-`pnpm preview` above is the *local* Wrangler server and is unrelated — the
-collision in the word "preview" is easy to trip over.
+`stage` is the only one of these that is stable and worth linking. The rest
+come and go with their branches, and the Cloudflare bot posts them into the
+pull request. All of them are unauthenticated and indexable by anyone holding
+the URL. `pnpm preview` above is the *local* Wrangler server and is unrelated
+— the collision in the word "preview" is easy to trip over.
 
-The consequence is now narrower: **a push to `stage` publishes; a feature or
-`dev` push does not.** Anything that must not be public — private datasets,
-personal or third-party trade data, unreleased copy — cannot reach `stage`
-until `WEB-BL-016` gates the staging hostname as well as the production one.
+The consequence worth internalizing is unchanged by the branch topology:
+**a push publishes, not only a merge.** Treat opening or updating a pull
+request as putting that build on the public internet. Anything that must not
+be public — private datasets, personal or third-party trade data, unreleased
+copy — cannot be in a pushed branch until `WEB-BL-016` gates the branch and
+staging hostnames as well as the production one. Adding `stage` added one
+more permanent public hostname; it removed none.
 
 ### Manual deploys
 

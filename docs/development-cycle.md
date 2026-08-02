@@ -77,8 +77,8 @@ must be green.
 The merge path is a promotion pipeline:
 
 1. Merge feature and fix pull requests into `dev`. Feature work may squash;
-   direct pushes are also allowed. Workers Builds does not build `dev`, so
-   integration publishes no public hostname.
+   direct pushes are also allowed. Workers Builds builds `dev` like any other
+   branch, so integration is public the moment it is pushed.
 2. Open a `dev` to `stage` promotion pull request, wait for the up-to-date
    `verify` check, and use a merge commit. Workers Builds publishes `stage` to
    the persistent public staging hostname.

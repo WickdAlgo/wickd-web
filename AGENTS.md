@@ -48,8 +48,9 @@ Workflow rules:
   deployment, configuration, risk, and follow-up impact.
 - Feature and fix pull requests target `dev`, the default integration branch.
   Promote `dev` to `stage`, then `stage` to `main`, through pull requests with
-  green `verify` checks. `dev` does not build; `stage` is the persistent public
-  rehearsal; every `main` commit deploys to production.
+  green `verify` checks. `stage` is the persistent public rehearsal and every
+  `main` commit deploys to production. Workers Builds still builds every
+  pushed branch to a public hostname, `dev` included — a push publishes.
 - Promotion pull requests must use merge commits, never squash or rebase, so
   the source branch retains a merged ancestry link. Feature pull requests into
   `dev` may squash. `docs/releases/README.md` owns the full rationale.
