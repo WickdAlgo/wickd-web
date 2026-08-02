@@ -40,14 +40,18 @@ scope changes, decisions, and verification.
 
 ## 5. Validation
 
-There is no test suite, so evidence is explicit:
-
 ```sh
 pnpm lint
+pnpm test
 pnpm build
 bash .claude/skills/add-ui-component/scripts/validate.sh
+pnpm test:e2e
 git diff --check
 ```
+
+The suite covers what can be wrong without looking wrong — causal filtering,
+contract parsing, chart geometry — and one Playwright spec proves the chart
+actually paints. It does not cover whether the result looks right.
 
 Then run `pnpm dev` or `pnpm preview` and check the affected routes at desktop
 and mobile widths, plus reduced motion for anything animated. Record what was

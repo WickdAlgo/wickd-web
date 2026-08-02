@@ -27,6 +27,7 @@ ceremony; a version closes when its contract's launch gate is satisfied.
 | Version | Status | Target |
 | --- | --- | --- |
 | [v0.1.0](v0.1.0.md) | Draft | first stable marketing surface and platform shell |
+| [v0.2.0](v0.2.0.md) | Draft | platform as frontend host: routes, contracts, real chart, causal replay |
 
 Lifecycle: `Draft` -> `Committed` -> `Shipped`. Use `Cancelled` for an
 abandoned contract. Record scope changes after commitment in the lifecycle log.
@@ -52,8 +53,9 @@ abandoned contract. Record scope changes after commitment in the lifecycle log.
   - **Marketing footer** (`src/app/(site)/layout.tsx` -> `Footer` ->
     `VersionList`) — both `web` and `core`. This is the only place the Core
     version appears.
-  - **Platform sidebar** (`src/app/platform/page.tsx`) — the `web` version
-    only, as a mono `Tag` at the bottom of the rail.
+  - **Platform sidebar** (`src/components/platform/platform-sidebar.tsx`) — the
+    `web` version only, as a mono `Tag`. At the bottom of the rail on desktop;
+    at the right-hand end of the strip below `sm`.
 
   Neither marker appears in the nav bar or the mobile drawer. Verify a bump in
   the footer and the platform sidebar; the nav will not change.
@@ -89,6 +91,27 @@ then `npx wrangler deploy`.
 pnpm build     # next build + the OpenNext bundle in .open-next/
 pnpm preview   # build and serve the Worker locally through Wrangler
 ```
+
+### Branch and commit preview URLs
+
+Workers Builds does not only build `main`. It builds pull-request branches and
+publishes each one at its own **public** hostname:
+
+```text
+https://<branch-slug>-wickd-web.<subdomain>.workers.dev   # follows the branch
+https://<hash>-wickd-web.<subdomain>.workers.dev          # pinned to a commit
+```
+
+These are unauthenticated and indexable by anyone holding the URL, and the
+Cloudflare bot posts them into the pull request. `pnpm preview` above is the
+*local* Wrangler server and is unrelated — the collision in the word "preview"
+is easy to trip over.
+
+The consequence worth internalizing: **a push publishes, not only a merge.**
+Treat opening or updating a pull request as putting that build on the public
+internet. Anything that must not be public — private datasets, personal or
+third-party trade data, unreleased copy — cannot be in a pushed branch until
+`WEB-BL-016` gates the preview hostnames as well as the production one.
 
 ### Manual deploys
 

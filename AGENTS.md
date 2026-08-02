@@ -9,6 +9,7 @@ Each source has one role:
 | What is shipped and how do I run it? | `README.md` |
 | What is the web surface for and what governs it? | `PRODUCT.md` |
 | How should it look and behave? | `DESIGN.md` |
+| Why is the architecture shaped this way? | `docs/architecture/` |
 | What work is planned or committed? | `docs/sprints/` |
 | What does a version include and require? | `docs/releases/` |
 | How does a version reach production? | `docs/releases/README.md` |
@@ -48,6 +49,9 @@ Workflow rules:
 - Merge reviewed work to `main` after required checks pass.
 - Merging to `main` deploys. Cloudflare Workers Builds runs on every `main`
   commit, so a merge is a production release.
+- Pushing a pull-request branch also deploys it, to a public preview hostname.
+  Nothing private belongs in a pushed branch. `docs/releases/README.md` covers
+  both paths.
 - Workers Builds is the only *sanctioned* deploy path. `pnpm deploy` also
   pushes straight to the production Worker from a local machine, bypassing
   review, CI, and the deployment record — treat it as an incident escape
@@ -67,14 +71,27 @@ Workflow rules:
   the deploy runbook.
 - `src/app/(site)/` contains the marketing routes (home, engine, pricing,
   design) sharing the `SiteNav` + `Footer` shell from `(site)/layout.tsx`.
-- `src/app/platform/` is the platform shell: one client page whose sidebar
-  switches between views in React state. There are no nested platform routes.
+- `src/app/platform/` is the platform surface: nested routes sharing a layout,
+  with the sidebar deriving its active state from the URL.
 - `src/components/ui/` is the WickdAlgo component library, re-exported through
   `src/components/ui/index.ts`. Import from `@/components/ui`.
 - `src/components/home/` and `src/components/platform/` contain
   page-specific composition that is deliberately not part of the library.
+- `src/contracts/` holds the versioned, runtime-validated payload schemas the
+  platform renders. They are provisional: `Wickd.Inspection` will become
+  canonical, so nothing outside this directory defines a structure shape.
+- `src/data/platform/` holds the `PlatformGateway` and its fixture
+  implementation. Views depend on the gateway, never on a fixture array.
+- `src/features/` holds domain-aware composition that is too specific for the
+  component library and too reusable for one route — currently the chart
+  renderer and causal replay.
 - `src/lib/` contains `cx.ts`, `styles.ts`, `use-controllable.ts`,
-  `use-reduced-motion.ts`, and `version.ts`.
+  `use-reduced-motion.ts`, `use-theme-epoch.ts`, and `version.ts`.
+
+Imports run one way: `app/` -> `features/` -> `data/` -> `contracts/`. A
+renderer receives typed data and emits callbacks; it never reaches for a
+gateway. `docs/architecture/001-platform-and-journal-boundaries.md` states why,
+and what this repository must never compute.
 - `src/app/globals.css` holds every design token. There is no
   `tailwind.config` file.
 - `core-version.json` records the Wickd.Core version for display only. It is
@@ -106,10 +123,13 @@ pnpm preview
   in `.open-next/`. The plain Next build is `pnpm build:next`.
 - `preview` builds and serves the Worker locally through Wrangler.
 
-There is no test suite. `.github/workflows/ci.yml` runs `pnpm lint`,
-`pnpm build`, and the design-system validator on every push to `main` and every
-pull request. Validation for UI work is the preview plus the checks named in
-the sprint item.
+- `test` runs the Vitest unit and component suite once; `test:watch` keeps it
+  open.
+- `test:e2e` runs the Playwright workflow spec against `pnpm start`.
+
+`.github/workflows/ci.yml` runs `pnpm lint`, `pnpm test`, `pnpm build`, the
+design-system validator, and `pnpm test:e2e` on every push to `main` and every
+pull request.
 
 ## Coding Style & Naming Conventions
 
@@ -127,18 +147,28 @@ non-obvious layout, motion, deployment, or design-system decisions.
 
 ## Testing Guidelines
 
-There is no automated test suite. Prove UI work instead:
-
 ```text
 pnpm lint
+pnpm test
 pnpm build
 bash .claude/skills/add-ui-component/scripts/validate.sh
+pnpm test:e2e
 ```
 
-Run `pnpm dev` or `pnpm preview` and check the affected routes at desktop and
-mobile widths, including reduced-motion behavior for animated work. Record what
-was checked in the sprint work log; screenshots belong in the pull request for
-visual changes.
+Unit and component tests are colocated as `src/**/*.test.{ts,tsx}` and run in
+jsdom. They cover the logic that can be wrong without looking wrong — causal
+filtering, contract parsing and version rejection, chart geometry — plus the
+interactive library components.
+
+The chart is never mounted in Vitest: jsdom returns `null` from `getContext`.
+Chart geometry is asserted by rendering the overlay against a hand-built
+projection, which is why `Projection` is an interface. Proving the chart
+actually paints is the Playwright spec's job, and only its job.
+
+Automated tests do not replace looking at the result. Run `pnpm dev` or
+`pnpm preview` and check the affected routes at desktop and mobile widths,
+including reduced-motion behavior for animated work. Record what was checked in
+the sprint work log; screenshots belong in the pull request for visual changes.
 
 ## Commit & Pull Request Guidelines
 
