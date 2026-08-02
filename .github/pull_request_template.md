@@ -30,8 +30,18 @@
 
 ## Deployment And Version Impact
 
-- [ ] No version impact. Merging deploys this change to production as-is.
-- [ ] Release-prep change; `package.json` version and deployment notes:
+**Base branch:**
+
+- [ ] Feature or fix into `dev`.
+- [ ] Promotion: `dev` to `stage` or `stage` to `main` (merge commit only).
+- [ ] Hotfix into `main`; back-merge pull requests from `main` to `stage` and
+      from `stage` to `dev` follow.
+
+**Version:**
+
+- [ ] No version impact.
+- [ ] Release-prep change; lands on `dev` with the `package.json` version and
+      deployment notes:
 
 ## Configuration And Breaking Changes
 
