@@ -77,20 +77,22 @@ must be green.
 The merge path is a promotion pipeline:
 
 1. Merge feature and fix pull requests into `dev`. Feature work may squash;
-   direct pushes are also allowed. Workers Builds does not build `dev`, so
-   integration publishes no public hostname.
-2. Open a `dev` to `stage` promotion pull request, wait for the up-to-date
-   `verify` check, and use a merge commit. Workers Builds publishes `stage` to
-   the persistent public staging hostname.
+   direct pushes are also allowed. Workers Builds builds `dev` like any other
+   branch, so integration is public the moment it is pushed.
+2. Open a `dev` to `stage` promotion pull request, wait for `verify`, and use
+   a merge commit. Workers Builds publishes `stage` to the persistent public
+   staging hostname.
 3. Rehearse the integrated result on `stage`.
-4. Open a `stage` to `main` promotion pull request, wait for the up-to-date
-   `verify` check, and use a merge commit. Every `main` commit deploys to
-   production, so this promotion is the deploy event.
+4. Open a `stage` to `main` promotion pull request, wait for `verify`, and use
+   a merge commit. Every `main` commit deploys to production, so this
+   promotion is the deploy event.
 
 Promotion pull requests never squash or rebase because the source branch must
-retain a merged ancestry link. A hotfix branches from and returns to `main`,
-then back-merges from `main` to `stage` and from `stage` to `dev` before the
-next promotion. The next promotion can otherwise restore the pre-hotfix state.
+retain a merged ancestry link. Each promotion leaves its source one merge
+commit behind its target, which is expected and needs no reconciliation.
+
+A hotfix branches from and returns to `main`, then back-merges from `main` to
+`stage` and from `stage` to `dev`, so neither branch keeps rehearsing the bug.
 `docs/releases/README.md` holds the full rationale and protection details.
 
 ## 9. Release Record

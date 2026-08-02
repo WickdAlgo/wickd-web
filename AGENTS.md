@@ -48,15 +48,17 @@ Workflow rules:
   deployment, configuration, risk, and follow-up impact.
 - Feature and fix pull requests target `dev`, the default integration branch.
   Promote `dev` to `stage`, then `stage` to `main`, through pull requests with
-  green `verify` checks. `dev` does not build; `stage` is the persistent public
-  rehearsal; every `main` commit deploys to production.
+  green `verify` checks. `stage` is the persistent public rehearsal and every
+  `main` commit deploys to production. Workers Builds still builds every
+  pushed branch to a public hostname, `dev` included — a push publishes.
 - Promotion pull requests must use merge commits, never squash or rebase, so
   the source branch retains a merged ancestry link. Feature pull requests into
   `dev` may squash. `docs/releases/README.md` owns the full rationale.
 - Hotfixes branch from and merge into `main`, then return through back-merge
   pull requests from `main` to `stage` and from `stage` to `dev` before the
-  next promotion. Skipping the back-merges can silently revert the fix.
-  `docs/releases/README.md` governs the complete path.
+  next promotion. Until they land, `dev` and `stage` rehearse code that still
+  contains the bug. `docs/releases/README.md` governs the complete path, and
+  explains why a promotion leaves its source branch one commit behind.
 - Workers Builds is the only *sanctioned* deploy path. `pnpm deploy` also
   pushes straight to the production Worker from a local machine, bypassing
   review, CI, and the deployment record — treat it as an incident escape
