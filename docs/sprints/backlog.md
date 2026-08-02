@@ -433,23 +433,29 @@ depend on.
 - **Area:** repository-wide, `wrangler.jsonc`, `PRODUCT.md`
 - **User value:** The platform is about to hold a third party's trade diary and
   the maintainer's own trades, screenshots, and notes. It is currently a public
-  route on a public site, in a public repository that deploys on every merge —
-  **and on every push to a pull-request branch.**
+  route on a public site, in a public repository that deploys on every merge
+  to `main`, on every push to `stage`, **and on every push to any other
+  branch.**
 - **Release target:** `docs/releases/v0.3.0.md` (not yet opened)
 - **Acceptance:** Journal data is absent from the git repository and from the
   public build, and `/platform` is reachable only by an authenticated
-  maintainer **on every hostname that serves it, previews included**.
+  maintainer **on every hostname that serves it, staging and branch builds
+  included**.
 - **Technical constraints:**
   - Chosen direction: keep one repository and one deploy; the build reads
     journal data from `wickd-data` (private) so nothing is committed here, and
     Cloudflare Access gates `/platform`. The marketing surface stays public.
   - Access must cover the route's JavaScript chunks, not only its HTML — a
     gated page whose data chunk is public is not gated.
-  - **Branch and commit previews are separate public hostnames.** Workers
-    Builds served PR #11 at
+  - **Every pushed branch is a separate public hostname, and the branch
+    topology added one more.** Workers Builds served PR #11 at
     `feat-platform-journal-w0-w5-wickd-web.burak-dorman.workers.dev` with all
-    of `/platform` reachable unauthenticated, before any merge. A policy
-    scoped to the production hostname leaves that open. Gate the
+    of `/platform` reachable unauthenticated, before any merge. It now also
+    serves `stage-wickd-web.<subdomain>.workers.dev` permanently. *Branch
+    control* is one checkbox for all non-production branches, so `stage`
+    cannot be built without also building `dev` and every feature branch
+    short of a second Workers Builds connection. A policy scoped to the
+    production hostname leaves all of it open. Gate the
     `*-wickd-web.<subdomain>.workers.dev` pattern too, or disable preview URLs
     — otherwise a *push* publishes the journal and this item can be marked
     done with the hole still in place.
@@ -458,7 +464,8 @@ depend on.
   - The public build must remain buildable with no `wickd-data` present, or CI
     on a fork breaks.
 - **Validation:** A logged-out request to `/platform` and to its chunks is
-  refused **on both the production hostname and a live branch preview**;
+  refused **on the production hostname, the persistent staging hostname, and
+  a live branch build**;
   `git grep` finds no mentor or personal trade data.
 
 ### WEB-BL-017: There Is No Way To Record A Trade

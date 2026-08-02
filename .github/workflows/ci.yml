@@ -1,8 +1,11 @@
 name: CI
 
 on:
+  # All three long-lived branches. `dev` takes direct pushes, so push CI is the
+  # only gate it has; `main` and `stage` require the `verify` check below to
+  # merge, and push CI covers the rare ruleset-bypassing commit.
   push:
-    branches: [main]
+    branches: [main, stage, dev]
   pull_request:
 
 jobs:

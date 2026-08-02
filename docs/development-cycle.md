@@ -5,8 +5,8 @@ resolved. `AGENTS.md` is the short contract; this document explains each stage.
 
 ```text
 idea -> backlog -> sprint -> implementation -> validation
-     -> changelog + release contract -> PR/review -> merge
-     -> Workers Builds deploy -> release record
+     -> changelog + release contract -> PR/review -> dev
+     -> stage rehearsal -> main deploy -> release record
 ```
 
 ## 1. Idea
@@ -33,10 +33,10 @@ user-visible, risky, or cross-cutting may not.
 
 ## 4. Implementation
 
-Work on a branch. Follow `DESIGN.md` for anything visual and
-`.claude/skills/add-ui-component` for anything entering `src/components/ui/`.
-Append work-log bullets only for material updates: status changes, blockers,
-scope changes, decisions, and verification.
+Create feature and fix branches from `dev`. Follow `DESIGN.md` for anything
+visual and `.claude/skills/add-ui-component` for anything entering
+`src/components/ui/`. Append work-log bullets only for material updates:
+status changes, blockers, scope changes, decisions, and verification.
 
 ## 5. Validation
 
@@ -65,25 +65,46 @@ in the sprint file.
 
 ## 7. Pull Request And Review
 
-Use `.github/pull_request_template.md`. Conventional Commits:
-`type(scope): summary`. Attach before/after screenshots for visual changes. CI
-must be green: lint, build, and the design-system validator.
+Open feature and fix pull requests against `dev` and use
+`.github/pull_request_template.md`. Conventional Commits:
+`type(scope): summary`. Attach before/after screenshots for visual changes.
+CI runs on every pull request and on pushes to `dev`, `stage`, and `main`.
+Lint, tests, build, the design-system validator, and the end-to-end workflow
+must be green.
 
 ## 8. Merge And Deploy
 
-Merge to `main`. Cloudflare Workers Builds deploys every `main` commit, so
-**merging is deploying** — `main` is production. Confirm the deployment
-succeeded before moving on.
+The merge path is a promotion pipeline:
+
+1. Merge feature and fix pull requests into `dev`. Feature work may squash;
+   direct pushes are also allowed. Workers Builds builds `dev` like any other
+   branch, so integration is public the moment it is pushed.
+2. Open a `dev` to `stage` promotion pull request, wait for `verify`, and use
+   a merge commit. Workers Builds publishes `stage` to the persistent public
+   staging hostname.
+3. Rehearse the integrated result on `stage`.
+4. Open a `stage` to `main` promotion pull request, wait for `verify`, and use
+   a merge commit. Every `main` commit deploys to production, so this
+   promotion is the deploy event.
+
+Promotion pull requests never squash or rebase because the source branch must
+retain a merged ancestry link. Each promotion leaves its source one merge
+commit behind its target, which is expected and needs no reconciliation.
+
+A hotfix branches from and returns to `main`, then back-merges from `main` to
+`stage` and from `stage` to `dev`, so neither branch keeps rehearsing the bug.
+`docs/releases/README.md` holds the full rationale and protection details.
 
 ## 9. Release Record
 
 A version is not a tag here. When a contract's scope is complete:
 
-1. Finalize its `CHANGELOG.md` section and link the contract.
-2. Set `version` in `package.json`.
-3. Satisfy the contract's launch gate.
-4. Merge the release-prep pull request, confirm the deploy, and flip the
-   contract to `Shipped` with its deployment record.
+1. Finalize its `CHANGELOG.md` section and link the contract on `dev`.
+2. Set `version` in `package.json` on `dev`.
+3. Promote `dev` to `stage` and satisfy the contract's launch gate against the
+   exact version staged for production.
+4. Merge the `stage` to `main` promotion pull request, confirm the deployment,
+   and flip the contract to `Shipped` with its deployment record.
 
 `docs/releases/README.md` holds the full release profile, versioning rules,
 deploy runbook, and rollback path.
