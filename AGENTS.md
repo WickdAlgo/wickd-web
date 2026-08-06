@@ -64,10 +64,20 @@ Workflow rules:
   review, CI, and the deployment record — treat it as an incident escape
   hatch, not a release mechanism, and record any use in the sprint work log.
   `docs/releases/README.md` governs it.
-- A version ships as a deployment record, not a tag: release-prep work
-  finalizes the changelog section, sets `version` in `package.json`, satisfies
-  the contract launch gate, and the contract flips to `Shipped` once the deploy
-  is confirmed live. This repository publishes no packages and cuts no tags.
+- A version ships as a deployment record rather than an artifact: release-prep
+  work finalizes the changelog section, sets `version` in `package.json`,
+  satisfies the contract launch gate, and the contract flips to `Shipped` once
+  the deploy is confirmed live. This repository publishes no packages.
+- Reaching `main` also cuts an annotated `v<version>` tag and a GitHub Release,
+  from `package.json` and the matching `CHANGELOG.md` section. The tag is the
+  rollback target, not a deploy trigger — Workers Builds has already published
+  by the time it exists. Tags are immutable by ruleset; a bad release is fixed
+  by a new version, never by moving a tag. `docs/releases/README.md` owns the
+  rules.
+- `.github/workflows/pr-policy.yml` enforces the promotion edges: into `stage`
+  only from `dev`, into `main` only from `stage` or `hotfix/*`, plus a
+  Conventional Commit title and a changelog change unless the pull request is
+  labeled `not-release-relevant`.
 
 ## Project Structure & Module Organization
 

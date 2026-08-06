@@ -1,8 +1,10 @@
 # Release Workflow
 
-`wickd-web` is a publicly deployed static site. It publishes no packages and
-cuts no tags: a version ships as a **deployment record**. Each planned version
-has a scope contract in this directory.
+`wickd-web` is a publicly deployed static site. It publishes no packages, so a
+version ships as a **deployment record** rather than an artifact. It does cut a
+tag: reaching production marks a commit as the one a version shipped from, which
+is what makes a rollback target exist. Each planned version has a scope contract
+in this directory.
 
 `AGENTS.md` governs the repository development loop; `../sprints/` contains
 planning and delivery evidence.
@@ -40,6 +42,13 @@ public-exposure question, and splitting the deploy first would only move it.
 publishes it at the persistent, unauthenticated hostname
 `https://stage-wickd-web.<subdomain>.workers.dev`. `main` has the same pull
 request and check requirements, and every commit on it deploys to production.
+
+`.github/workflows/pr-policy.yml` enforces the two promotion edges mechanically:
+a pull request into `stage` must come from this repository's `dev`, and one into
+`main` from `stage` or a `hotfix/*` branch. It also requires a Conventional
+Commit title and a `CHANGELOG.md` change unless the pull request carries the
+`not-release-relevant` label. It does not guard `dev`, which takes direct pushes
+and has no promotion edge to protect.
 
 Two ancestry rules are load-bearing:
 
@@ -85,7 +94,13 @@ All three GitHub rulesets have `enforcement: active` and empty
 - Their `required_approving_review_count` is `0`. A sole maintainer cannot
   approve their own pull request, so any higher value would deadlock every
   merge without adding review.
-- `guard-dev` blocks deletion of `dev` only. Direct pushes remain available.
+- `guard-dev` blocks deletion and non-fast-forward pushes on `dev`. Ordinary
+  direct pushes remain available, which is what the branch is for; the
+  force-push block costs the `core-version` bot nothing, since its commits are
+  fast-forward, and it removes the one way `dev` history could be destroyed
+  silently.
+- `Immutable release tags` blocks updating or deleting any `v*` tag, so a
+  released version cannot be quietly repointed at different code.
 - `delete_branch_on_merge` remains `false`. Automatic deletion would remove
   `dev` itself after merging a `dev` to `stage` promotion pull request.
 
@@ -98,12 +113,31 @@ All three GitHub rulesets have `enforcement: active` and empty
 - **Channel:** Cloudflare Workers Builds, deploying every commit on `main`.
 - **Release branch:** `main`.
 - **Release trigger:** Merging the `stage` to `main` promotion pull request.
-  There is no tag, no GitHub Release, and no release workflow.
+- **Release record:** `.github/workflows/release.yml` cuts the annotated tag
+  `v<version>` and a GitHub Release whose notes are the version's changelog
+  section. A version string containing a hyphen is marked as a prerelease.
 
 Because every `main` commit deploys, a "release" here records *scope reaching
 production*, not a separate publishing event. A version closes when its
 contract's launch gate is satisfied and its `stage` to `main` promotion is
 confirmed live.
+
+The tag does not gate the deploy and cannot: Workers Builds publishes on the
+push, so the deployment exists before the workflow runs. What the tag adds is a
+named commit to return to. It is derived from `package.json`, so nothing extra
+has to be remembered at release time — release prep already sets that value.
+
+Two consequences follow from every `main` commit running the release workflow:
+
+- A `main` commit that does not bump the version finds its tag already taken.
+  That is the expected state between releases, so the workflow reports it and
+  succeeds. A hotfix therefore does not produce a tag unless it bumps the
+  version, and the tag for that version keeps pointing at the commit the
+  version originally shipped from.
+- The tag is cut from whatever `package.json` says on `main`. Promoting a
+  finalized changelog section without the matching version bump would tag
+  nothing; promoting a bump without a finalized section fails the workflow
+  before it tags. Steps 2 and 3 of Release Prep are one unit for that reason.
 
 ## Contract Index
 
@@ -272,15 +306,33 @@ ships and removes a later back-merge solely to reconcile `package.json`.
    merge it with a merge commit. This is the release trigger.
 10. Confirm the production Workers Builds deployment succeeded and the live
     site serves the new version marker.
-11. Set the contract to `Shipped`, record the deployment date in its lifecycle
-    log, and update the index above.
+11. Confirm the `Release` workflow cut `v<version>` and that the GitHub Release
+    notes match the finalized changelog section.
+12. Set the contract to `Shipped`, record the deployment date and the tag in
+    its lifecycle log, and update the index above.
 
 ## Rollback
 
-There is no tag to revert to. Roll back by redeploying a previous Workers
-Builds deployment from the Cloudflare dashboard for an immediate fix, then
-revert the offending commit on `main` so the repository and production agree.
-Merge that revert back down from `main` to `stage` and from `stage` to `dev`
-before the next promotion, following the hotfix rule above. Otherwise the next
-promotion can reintroduce the offending change. Record both the rollback and
-the back-merges in the sprint work log.
+Roll back by redeploying a previous Workers Builds deployment from the
+Cloudflare dashboard. That is the immediate fix and it is unchanged: the tag
+does not deploy anything, so reverting to it is not a deploy action.
+
+What the tag changes is the second half. Previously the only record of what
+production had been running was a Cloudflare build entry, and reconciling the
+repository with it meant identifying the right commit by hand. Now the last
+good state is `v<previous>`, so the revert has an unambiguous target:
+
+```sh
+git log --oneline v<previous>..main   # what shipped since the last release
+git revert --no-commit v<previous>..main
+```
+
+Then revert the offending commit on `main` so the repository and production
+agree, and merge that revert back down from `main` to `stage` and from `stage`
+to `dev` before the next promotion, following the hotfix rule above. Otherwise
+the next promotion can reintroduce the offending change. Record the rollback,
+the back-merges, and the tag rolled back from in the sprint work log.
+
+Do not move or delete the tag of a bad release. The `Immutable release tags`
+ruleset blocks both, deliberately — the tag records what *did* ship, including
+when what shipped was wrong. Cut the fix as a new version.

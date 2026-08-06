@@ -1,0 +1,201 @@
+name: Release
+
+# Cuts the tag and GitHub Release that `main` previously had no equivalent of.
+#
+# Merging `stage` into `main` remains the release trigger — Workers Builds still
+# deploys every `main` commit, and nothing here publishes an artifact. What this
+# adds is a fixed point: before it, "roll back" meant redeploying a Cloudflare
+# build from the dashboard and hoping the repository could be reconciled after
+# the fact, because no commit was marked as the one a version shipped from.
+#
+# The version is read from package.json, which is already the single source
+# truth the site renders (NEXT_PUBLIC_WEB_VERSION -> WEB_VERSION). Release prep
+# bumps it on `dev` and it rides the promotion train, so by the time a commit
+# reaches `main` the intended version is already in the tree.
+#
+# On a pull request the same checks run without tagging, so a malformed version
+# or a missing changelog section fails while the promotion is still reviewable
+# rather than after it is live.
+
+on:
+  push:
+    branches:
+      - main
+  # No `paths:` filter on purpose. A filtered workflow reports no status at all
+  # on the runs it skips, so making this a required check while filtered would
+  # leave promotion pull requests pending forever.
+  pull_request:
+    branches:
+      - stage
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Tag and release
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      # Needed to push the tag and create the release. Read-only on pull
+      # requests would be preferable, but permissions cannot vary per event;
+      # the publish step is gated on the event instead.
+      contents: write
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Resolve and validate the release context
+        id: context
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          version="$(node -p "require('./package.json').version")"
+          if ! printf '%s' "$version" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.]+)?$'; then
+            echo "::error::package.json version is not a semver: '${version}'"
+            exit 1
+          fi
+
+          # A hyphen is the semver prerelease marker, so `0.2.0-preview` and
+          # `0.2.0-preview.3` both flag as prerelease without a second rule.
+          if [[ "$version" == *-* ]]; then
+            prerelease=true
+          else
+            prerelease=false
+          fi
+
+          {
+            echo "version=$version"
+            echo "tag=v$version"
+            echo "prerelease=$prerelease"
+          } >> "$GITHUB_OUTPUT"
+
+          echo "Resolved v${version} (prerelease=${prerelease})."
+
+      - name: Check the tag is free
+        id: tag
+        shell: bash
+        env:
+          TAG: ${{ steps.context.outputs.tag }}
+        run: |
+          set -euo pipefail
+          git fetch --force --tags origin
+
+          if ! git rev-parse --verify --quiet "refs/tags/${TAG}^{commit}" >/dev/null; then
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "${TAG} is free."
+            exit 0
+          fi
+
+          existing="$(git rev-list -n 1 "refs/tags/${TAG}")"
+          echo "exists=true" >> "$GITHUB_OUTPUT"
+
+          if [[ "$existing" == "$GITHUB_SHA" ]]; then
+            echo "${TAG} already points at this commit. Nothing to do."
+            exit 0
+          fi
+
+          # Not a failure. Every `main` commit runs this workflow, but only the
+          # ones that carry a version bump should cut a release — a hotfix or a
+          # doc fix legitimately lands on an already-tagged version. Failing
+          # here would leave the workflow permanently red between releases.
+          echo "::notice::${TAG} already exists at ${existing}."
+          echo "::notice::Bump version in package.json to cut a new release."
+
+      - name: Extract the changelog section
+        id: notes
+        shell: bash
+        env:
+          VERSION: ${{ steps.context.outputs.version }}
+          # Only the run that actually cuts the tag demands a finalized
+          # section. A routine `dev -> stage` promotion carries an unbumped
+          # version whose heading does not exist yet, and failing those would
+          # block every promotion between releases rather than catch anything.
+          REQUIRED: >-
+            ${{ github.event_name == 'push' && steps.tag.outputs.exists == 'false' }}
+        run: |
+          set -euo pipefail
+
+          # Keep a Changelog headings: `## [X.Y.Z] - YYYY-MM-DD`. Take
+          # everything between a heading and the next `## `.
+          section() {
+            awk -v v="$1" '
+              index($0, "## [" v "]") == 1 { capture = 1; next }
+              capture && /^## / { exit }
+              capture { print }
+            ' CHANGELOG.md
+          }
+
+          notes="$(section "$VERSION")"
+
+          if [[ -z "${notes//[[:space:]]/}" ]]; then
+            if [[ "$REQUIRED" == "true" ]]; then
+              echo "::error::CHANGELOG.md has no non-empty '## [${VERSION}]' section." >&2
+              echo "Release prep finalizes Unreleased under the version heading first." >&2
+              exit 1
+            fi
+            # Validation runs fall back to Unreleased, which is what a
+            # mid-cycle promotion legitimately has.
+            notes="$(section 'Unreleased')"
+            echo "::notice::No '## [${VERSION}]' section yet — validating Unreleased."
+          fi
+
+          {
+            echo "body<<CHANGELOG_EOF"
+            printf '%s\n' "$notes"
+            echo "CHANGELOG_EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Create the tag and GitHub Release
+        if: >-
+          github.event_name == 'push'
+          && steps.tag.outputs.exists == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.context.outputs.tag }}
+          VERSION: ${{ steps.context.outputs.version }}
+          PRERELEASE: ${{ steps.context.outputs.prerelease }}
+          NOTES: ${{ steps.notes.outputs.body }}
+        run: |
+          set -euo pipefail
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -a "$TAG" -m "wickd-web $VERSION"
+          git push origin "$TAG"
+
+          args=(--title "$TAG" --notes "$NOTES" --verify-tag)
+          if [[ "$PRERELEASE" == "true" ]]; then
+            args+=(--prerelease)
+          fi
+          gh release create "$TAG" "${args[@]}"
+
+          echo "Released ${TAG}."
+
+      - name: Summarize
+        if: always()
+        env:
+          TAG: ${{ steps.context.outputs.tag }}
+          EXISTS: ${{ steps.tag.outputs.exists }}
+          EVENT: ${{ github.event_name }}
+        run: |
+          {
+            echo "### ${TAG}"
+            if [[ "$EVENT" != "push" ]]; then
+              echo "Validation only — no tag is cut outside a \`main\` push."
+            elif [[ "$EXISTS" == "true" ]]; then
+              echo "Already tagged. Bump \`package.json\` to cut a new release."
+            else
+              echo "Tag and GitHub Release created."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

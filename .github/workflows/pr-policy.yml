@@ -1,0 +1,108 @@
+name: PR Policy
+
+# Mechanical enforcement of the promotion topology that docs/releases/README.md
+# describes. The runbook was the only thing holding the branch path in place,
+# and a documented rule that nothing checks is a rule that eventually breaks:
+# a `feature -> main` pull request merged cleanly before this existed.
+#
+# `dev` is deliberately absent from the branch list. It takes direct pushes
+# (see core-version.yml), so a pull request into it is optional and gating one
+# would only punish the contributor who opened it. The paths that must not be
+# skipped are the two promotions, and those are the ones checked here.
+
+on:
+  pull_request:
+    branches:
+      - stage
+      - main
+    types: [opened, edited, synchronize, reopened, labeled, unlabeled]
+
+permissions:
+  contents: read
+
+jobs:
+  policy:
+    name: PR policy
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Validate Conventional Commit title
+        shell: bash
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          set -euo pipefail
+          pattern='^(feat|fix|docs|test|refactor|perf|build|ci|chore|revert)(\([a-z0-9._/-]+\))?!?: .+'
+          if [[ ! "$PR_TITLE" =~ $pattern ]]; then
+            echo "PR title must follow Conventional Commits: type(scope): summary" >&2
+            echo "Got: $PR_TITLE" >&2
+            exit 1
+          fi
+
+      - name: Validate promotion source branch
+        shell: bash
+        env:
+          BASE_BRANCH: ${{ github.base_ref }}
+          HEAD_BRANCH: ${{ github.head_ref }}
+          HEAD_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          # The head repository is checked as well as the branch name: a fork
+          # can name its branch `dev` too, and promoting a fork's `dev` into
+          # `stage` would deploy unreviewed code to a public hostname.
+          case "$BASE_BRANCH" in
+            stage)
+              if [[ "$HEAD_REPOSITORY" != "$REPOSITORY" || "$HEAD_BRANCH" != "dev" ]]; then
+                echo "Only the repository's dev branch may promote into stage." >&2
+                exit 1
+              fi
+              ;;
+            main)
+              # A hotfix branched from `main` is the one documented exception,
+              # and it still returns down the chain by back-merge afterwards.
+              if [[ "$HEAD_REPOSITORY" != "$REPOSITORY" ]]; then
+                echo "Only branches in this repository may merge into main." >&2
+                exit 1
+              fi
+              case "$HEAD_BRANCH" in
+                stage) ;;
+                hotfix/*)
+                  echo "Hotfix into main. Back-merge main -> stage -> dev once it lands."
+                  ;;
+                *)
+                  echo "Only stage promotions or hotfix/* branches may merge into main." >&2
+                  exit 1
+                  ;;
+              esac
+              ;;
+            *)
+              echo "This workflow only guards stage and main." >&2
+              exit 1
+              ;;
+          esac
+
+      - name: Require changelog or explicit exemption
+        shell: bash
+        env:
+          LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          if [[ ",${LABELS}," == *",not-release-relevant,"* ]]; then
+            echo "PR is explicitly not release-relevant."
+            exit 0
+          fi
+
+          if git diff --name-only "$BASE_SHA"...HEAD | grep -qx 'CHANGELOG.md'; then
+            echo "CHANGELOG.md updated."
+          else
+            echo "Update CHANGELOG.md or add the not-release-relevant label." >&2
+            exit 1
+          fi
