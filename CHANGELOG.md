@@ -58,6 +58,16 @@ history prior to the first entry below is in git.
 - `docs`: the development cycle and document hierarchy — `PRODUCT.md`,
   `AGENTS.md`, `DESIGN.md`, `docs/sprints/`, `docs/releases/`, and the pull
   request template.
+- `ci`: versioned releases. Reaching `main` now cuts the annotated tag
+  `v<version>` and a GitHub Release, taking the version from `package.json` and
+  the notes from the matching `CHANGELOG.md` section. The tag is a rollback
+  target, not a deploy trigger — Workers Builds still publishes on the push. A
+  `v*` ruleset makes tags immutable, so a bad release is corrected by a new
+  version rather than by moving a tag.
+- `ci`: `PR Policy` enforces the promotion path that was previously documented
+  only — into `stage` from `dev`, into `main` from `stage` or `hotfix/*` —
+  along with a Conventional Commit title and a changelog change unless the pull
+  request is labeled `not-release-relevant`.
 
 ### Changed
 
@@ -68,6 +78,9 @@ history prior to the first entry below is in git.
   strengthened.
 - `ci`: unit tests run before the build and a Playwright spec after it, so a
   logic regression fails in seconds rather than after a bundle.
+- `ci`: `guard-dev` now blocks non-fast-forward pushes as well as deletion.
+  Direct pushes to `dev` are unaffected, including the `core-version` bot's,
+  which closes the one path by which `dev` history could be destroyed silently.
 - `design`: pages, the UI kit, and the animated logo were migrated onto design
   tokens. The migration is not complete — hex literals remain in the hero
   background and the favicon (`WEB-BL-006`); the platform view code blocks were
